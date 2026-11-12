@@ -73,6 +73,9 @@ svg text{fill:var(--muted);font-size:10px}
   #printArea{display:block!important;padding:16px;color:#000;background:#fff}
   #printArea h1{font-size:1.4rem;margin:0 0 4px} #printArea h2{margin:18px 0 6px;border-bottom:1px solid #999;padding-bottom:2px}
   #printArea table{width:100%;border-collapse:collapse;font-size:.9rem} #printArea td,#printArea th{text-align:left;padding:4px 6px;border-bottom:1px solid #ddd;vertical-align:top}
+  #printArea .phead{display:flex;gap:14px;align-items:center} #printArea .phead img{width:80px;height:80px;border-radius:50%;object-fit:cover} #printArea .phead p{margin:0}
+  #printArea .palert{border:2px solid #b45309;border-radius:8px;padding:8px 10px}
+  #printArea table{margin-top:8px} #printArea tr>th:first-child:not(:only-child){white-space:nowrap}
 }
 </style>
 </head>
@@ -167,16 +170,17 @@ async function viewFile(f){
 
 /* ============ DATOS ============ */
 let S, view="resumen";
-const newPet=d=>({id:uid(),name:"",species:"Perro",breed:"",birth:"",sex:"",chip:"",allergies:"",vet:"",vetPhone:"",photo:"",vaccines:[],visits:[],meds:[],weights:[],feeding:{food:"",amount:"",times:"",notes:""},...d});
+const newPet=d=>({id:uid(),name:"",species:"Perro",breed:"",birth:"",sex:"",chip:"",allergies:"",vet:"",vetPhone:"",owner:"",ownerPhone:"",careNotes:"",photo:"",vaccines:[],visits:[],conditions:[],meds:[],weights:[],feeding:{food:"",amount:"",times:"",notes:""},...d});
 function seed(){
-  return{current:null,pets:[newPet({name:"Luna (ejemplo)",species:"Perro",breed:"Mestiza",birth:addDays(-1200),sex:"Hembra",chip:"985 112 004 567 890",allergies:"Alergia al pollo",vet:"Clínica Veterinaria Los Aromos",vetPhone:"+56 9 1234 5678",
+  return{current:null,pets:[newPet({name:"Luna (ejemplo)",species:"Perro",breed:"Mestiza",birth:addDays(-1200),sex:"Hembra",chip:"985 112 004 567 890",allergies:"Alergia al pollo",vet:"Clínica Veterinaria Los Aromos",vetPhone:"+56 9 1234 5678",owner:"Camila Soto",ownerPhone:"+56 9 8765 4321",careNotes:"Es cariñosa pero tímida con perros grandes. Le asustan los ruidos fuertes. Pasea 2 veces al día con arnés. No subir escaleras ni saltar (cadera).",
+    conditions:[{id:uid(),name:"Dermatitis alérgica alimentaria",since:addDays(-40),status:"En tratamiento",pro:"Dra. Rojas · Clínica Los Aromos",notes:"Alimento hipoalergénico de por vida. Evitar pollo y premios comerciales."},{id:uid(),name:"Displasia de cadera leve",since:addDays(-400),status:"Controlada",pro:"Felipe Muñoz · Fisiatra",notes:"Fisioterapia cada 15 días. Mantener peso bajo 13 kg. Evitar saltos."}],
     vaccines:[{id:uid(),kind:"Vacuna",name:"Óctuple",date:addDays(-350),next:addDays(15),notes:""},{id:uid(),kind:"Vacuna",name:"Antirrábica",date:addDays(-200),next:addDays(165),notes:""},{id:uid(),kind:"Antiparasitario interno",name:"Pastilla antiparasitaria",date:addDays(-95),next:addDays(-5),notes:""}],
-    visits:[{id:uid(),date:addDays(-40),clinic:"Clínica Los Aromos · Dra. Rojas",reason:"Picazón y enrojecimiento en la piel",diagnosis:"Dermatitis alérgica por alimento",notes:"Cambiar a alimento hipoalergénico. Control en 2 meses.",cost:"28000",files:[]}],
+    visits:[{id:uid(),date:addDays(-12),pro:"Fisiatra / kinesiólogo",clinic:"Felipe Muñoz · RehabCan",reason:"Sesión de fisioterapia de cadera",diagnosis:"Buena evolución, mejor rango de movimiento",notes:"Ejercicios en casa 10 min al día. Próxima sesión en 15 días.",cost:"22000",files:[]},{id:uid(),date:addDays(-40),pro:"Veterinario",clinic:"Clínica Los Aromos · Dra. Rojas",reason:"Picazón y enrojecimiento en la piel",diagnosis:"Dermatitis alérgica por alimento",notes:"Cambiar a alimento hipoalergénico. Control en 2 meses.",cost:"28000",files:[]}],
     meds:[{id:uid(),name:"Antihistamínico",dose:"1/2 comprimido",freq:"Cada 12 horas",times:"09:00, 21:00",start:addDays(-3),end:addDays(4),notes:"Dar con comida",files:[]}],
     weights:[{id:uid(),date:addDays(-300),kg:"11.2"},{id:uid(),date:addDays(-180),kg:"12.1"},{id:uid(),date:addDays(-40),kg:"12.8"}],
     feeding:{food:"Alimento hipoalergénico de salmón",amount:"120 g por porción",times:"08:00, 20:00",notes:"Sin premios con pollo"}})]};
 }
-function load(){try{S=JSON.parse(localStorage.getItem(STORE_KEY))}catch(e){} if(!S||!S.pets){S=seed();save()} if(!pet()&&S.pets[0])S.current=S.pets[0].id}
+function load(){try{S=JSON.parse(localStorage.getItem(STORE_KEY))}catch(e){} if(!S||!S.pets){S=seed();save()} S.pets=S.pets.map(p=>({...newPet({}),...p})); if(!pet()&&S.pets[0])S.current=S.pets[0].id}
 function save(){try{localStorage.setItem(STORE_KEY,JSON.stringify(S))}catch(e){alert("No se pudo guardar: el almacenamiento del dispositivo está lleno.")}}
 const pet=()=>S.pets.find(p=>p.id===S.current);
 
@@ -225,13 +229,20 @@ const TYPES={
     {k:"date",label:"Fecha aplicada",type:"date",req:1,def:()=>today()},
     {k:"next",label:"Próxima dosis",type:"date"},
     {k:"notes",label:"Notas",type:"textarea",ph:"Marca, lote, clínica…"}]},
-  visits:{title:"Visitas al veterinario",one:"visita",sort:"date",files:1,fields:[
+  visits:{title:"Visitas y atenciones",one:"visita",sort:"date",files:1,fields:[
     {k:"date",label:"Fecha",type:"date",req:1,def:()=>today()},
-    {k:"clinic",label:"Clínica / veterinario",ph:"Clínica Los Aromos"},
+    {k:"pro",label:"Profesional",type:"select",opts:["Veterinario","Urgencia","Especialista (dermatólogo, cardiólogo…)","Fisiatra / kinesiólogo","Etólogo / adiestrador","Dentista","Nutricionista","Peluquería canina","Otro"]},
+    {k:"clinic",label:"Clínica / nombre del profesional",full:1,ph:"Clínica Los Aromos · Dra. Rojas"},
     {k:"reason",label:"Motivo de la consulta",req:1,full:1,ph:"Control anual, vómitos, cojera…"},
     {k:"diagnosis",label:"Diagnóstico",full:1},
     {k:"cost",label:"Costo de la consulta ($)",type:"number"},
     {k:"notes",label:"Indicaciones y notas",type:"textarea",ph:"Tratamiento, exámenes pedidos, próximo control…"}]},
+  conditions:{title:"Diagnósticos y enfermedades crónicas",one:"diagnóstico",sort:"since",fields:[
+    {k:"name",label:"Diagnóstico o enfermedad",req:1,full:1,ph:"Diabetes, artrosis, epilepsia, alergia alimentaria…"},
+    {k:"status",label:"Estado",type:"select",opts:["En tratamiento","Controlada","Resuelta"]},
+    {k:"since",label:"Diagnosticada el",type:"date"},
+    {k:"pro",label:"Profesional que la trata",full:1,ph:"Dra. Rojas · Clínica Los Aromos"},
+    {k:"notes",label:"Cuidados e indicaciones",type:"textarea",ph:"Qué hacer, qué evitar, señales de alerta…"}]},
   meds:{title:"Remedios y recetas",one:"remedio",sort:"start",files:1,fields:[
     {k:"name",label:"Remedio",req:1,ph:"Antibiótico, gotas para oídos…"},
     {k:"dose",label:"Dosis",ph:"1/2 comprimido, 3 gotas…"},
@@ -250,6 +261,8 @@ const PET_FIELDS=[
   {k:"birth",label:"Fecha de nacimiento (aprox.)",type:"date"},{k:"chip",label:"N° de microchip"},
   {k:"allergies",label:"Alergias o condiciones importantes",full:1,ph:"Alergia al pollo, epilepsia…"},
   {k:"vet",label:"Veterinario / clínica de cabecera"},{k:"vetPhone",label:"Teléfono del veterinario",type:"tel"},
+  {k:"owner",label:"Tu nombre (contacto de emergencia)"},{k:"ownerPhone",label:"Tu teléfono",type:"tel"},
+  {k:"careNotes",label:"Carácter y cuidados (para quien la cuide)",type:"textarea",ph:"Miedos, paseos, dónde duerme, qué no puede hacer…"},
   {k:"photo",label:"Foto",type:"photo"}];
 function resolveDefs(fields){return fields.map(f=>typeof f.def==="function"?{...f,def:f.def()}:f)}
 function editRec(key,rec){
@@ -277,10 +290,13 @@ function ics(events,name){
 }
 
 /* ============ VISTAS ============ */
-const TABS=[["resumen","Resumen"],["vaccines","Vacunas"],["visits","Visitas"],["meds","Remedios"],["comida","Comida"],["weights","Peso"]];
+const TABS=[["resumen","Resumen"],["vaccines","Vacunas"],["visits","Visitas"],["conditions","Diagnósticos"],["meds","Remedios"],["comida","Comida"],["weights","Peso"]];
 function nextBadge(d){const n=daysTo(d);return n<0?`<span class="badge bad">Atrasada ${-n} día${n===-1?"":"s"}</span>`:n<=30?`<span class="badge warn">${n===0?"Hoy":"En "+n+" día"+(n===1?"":"s")}</span>`:`<span class="badge">${fmt(d)}</span>`}
 // una dosis "pendiente" deja de mostrarse cuando ya hay un registro posterior con el mismo nombre
 function pending(p){return p.vaccines.filter(v=>v.next&&!p.vaccines.some(o=>o!==v&&o.name.trim().toLowerCase()===v.name.trim().toLowerCase()&&o.date>v.date)).sort((a,b)=>a.next.localeCompare(b.next))}
+const activeConds=p=>p.conditions.filter(c=>c.status!=="Resuelta");
+const condBadge=c=>`<span class="badge ${c.status==="En tratamiento"?"warn":c.status==="Controlada"?"ok":""}">${esc(c.status||"")}</span>`;
+const lastWeight=p=>[...p.weights].sort((a,b)=>b.date.localeCompare(a.date))[0];
 const activeMeds=p=>p.meds.filter(m=>m.start<=today()&&(!m.end||m.end>=today()));
 const filesHTML=r=>(r.files&&r.files.length)?`<div class="files">${r.files.map(f=>`<span class="file" data-file="${f.id}"><span>${f.type==="application/pdf"?"📄":"🖼️"} ${esc(f.name)}</span></span>`).join("")}</div>`:"";
 
@@ -310,8 +326,13 @@ function vResumen(p,M){
     </div>
     ${p.allergies?`<div class="alert">⚠️ ${esc(p.allergies)}</div>`:""}
     ${p.vet||p.vetPhone?`<p style="margin:10px 0 0">🩺 ${esc(p.vet)} ${p.vetPhone?`· <a href="tel:${esc(p.vetPhone.replace(/\s/g,""))}" style="color:var(--brand)">${esc(p.vetPhone)}</a>`:""}</p>`:""}
-    <div class="actions"><button class="btn ghost sm" id="edit">✏️ Editar ficha</button><button class="btn ghost sm" id="print">🖨️ Ficha para el veterinario</button></div>
+    <div class="actions"><button class="btn ghost sm" id="edit">✏️ Editar ficha</button></div>
   </div>
+  <div class="card"><h2>Compartir la ficha de ${esc(p.name)}</h2>
+    <p class="muted" style="margin-top:0">Imprímela o guárdala como PDF para enviarla.</p>
+    <div class="actions" style="margin-top:0"><button class="btn sm" id="printVet">🩺 Ficha clínica (veterinario)</button><button class="btn sm" id="printCare">🏨 Ficha para cuidador u hotel</button><button class="btn ghost sm" id="share">💬 Enviar resumen por WhatsApp</button></div>
+  </div>
+  ${activeConds(p).length?`<div class="card"><h2>Diagnósticos y enfermedades crónicas</h2>${activeConds(p).map(c=>`<div class="item" style="cursor:default"><div class="top"><div><b>${esc(c.name)}</b>${c.notes?`<div class="muted">${esc(c.notes)}</div>`:""}</div>${condBadge(c)}</div></div>`).join("")}</div>`:""}
   <div class="card"><h2>Próximas vacunas y antiparasitarios</h2>
     ${pend.length?pend.map(v=>`<div class="item" style="cursor:default"><div class="top"><div><b>${esc(v.name)}</b><div class="muted">${esc(v.kind)} · le toca el ${fmt(v.next)}</div></div>${nextBadge(v.next)}</div></div>`).join(""):`<div class="empty">Nada pendiente 🎉</div>`}
   </div>
@@ -319,21 +340,22 @@ function vResumen(p,M){
     ${times.length?`<p style="margin:0 0 6px">🍽️ <b>Comida:</b> ${times.join(" · ")} ${p.feeding.amount?`<span class="muted">(${esc(p.feeding.amount)})</span>`:""}</p>`:`<p class="muted" style="margin:0 0 6px">Sin horarios de comida. Agrégalos en la pestaña Comida.</p>`}
     ${meds.length?meds.map(m=>`<p style="margin:0 0 6px">💊 <b>${esc(m.name)}</b> ${esc(m.dose)} ${m.freq?"· "+esc(m.freq):""} ${m.end?`<span class="muted">(hasta el ${fmt(m.end)})</span>`:""}</p>`).join(""):`<p class="muted" style="margin:0">Sin remedios activos.</p>`}
   </div>`;
-  $("edit").onclick=()=>editPet(p);$("print").onclick=()=>printReport(p);
+  $("edit").onclick=()=>editPet(p);$("printVet").onclick=()=>printReport(p,"clinica");$("printCare").onclick=()=>printReport(p,"cuidador");$("share").onclick=()=>shareSummary(p);
 }
 
 function vList(p,M){
   const key=view,T=TYPES[key],list=[...p[key]].sort((a,b)=>(b[T.sort]||"").localeCompare(a[T.sort]||""));
   const line={
     vaccines:r=>`<div class="top"><div><b>${esc(r.name)}</b><div class="muted">${esc(r.kind)} · aplicada el ${fmt(r.date)}</div>${r.notes?`<div class="muted">${esc(r.notes)}</div>`:""}</div>${r.next?`<div style="text-align:right">${pending(p).includes(r)?nextBadge(r.next):`<span class="badge ok">Al día</span>`}<br><button class="btn ghost sm" data-ics="${r.id}" style="margin-top:6px">📅 Recordar</button></div>`:""}</div>`,
-    visits:r=>`<div class="top"><div><b>${esc(r.reason)}</b><div class="muted">${fmt(r.date)}${r.clinic?" · "+esc(r.clinic):""}</div></div>${r.cost?`<span class="badge">$${(+r.cost).toLocaleString("es-CL")}</span>`:""}</div>${r.diagnosis?`<div><b>Diagnóstico:</b> ${esc(r.diagnosis)}</div>`:""}${r.notes?`<div class="muted">${esc(r.notes)}</div>`:""}${filesHTML(r)}`,
+    conditions:r=>`<div class="top"><div><b>${esc(r.name)}</b><div class="muted">${[r.since&&("Desde el "+fmt(r.since)),r.pro].filter(Boolean).map(esc).join(" · ")}</div>${r.notes?`<div class="muted">${esc(r.notes)}</div>`:""}</div>${condBadge(r)}</div>`,
+    visits:r=>`<div class="top"><div><b>${esc(r.reason)}</b><div class="muted">${[fmt(r.date),r.pro,r.clinic].filter(Boolean).map(esc).join(" · ")}</div></div>${r.cost?`<span class="badge">$${(+r.cost).toLocaleString("es-CL")}</span>`:""}</div>${r.diagnosis?`<div><b>Diagnóstico:</b> ${esc(r.diagnosis)}</div>`:""}${r.notes?`<div class="muted">${esc(r.notes)}</div>`:""}${filesHTML(r)}`,
     meds:r=>{const act=activeMeds(p).includes(r),t=parseTimes(r.times);return `<div class="top"><div><b>${esc(r.name)}</b> ${esc(r.dose)}<div class="muted">${[r.freq,t.join(" · ")].filter(Boolean).map(esc).join(" · ")}</div><div class="muted">Desde el ${fmt(r.start)}${r.end?" hasta el "+fmt(r.end):""}</div>${r.notes?`<div class="muted">${esc(r.notes)}</div>`:""}</div><div style="text-align:right"><span class="badge ${act?"ok":""}">${act?"Activo":r.start>today()?"Por empezar":"Terminado"}</span>${act&&t.length?`<br><button class="btn ghost sm" data-ics="${r.id}" style="margin-top:6px">📅 Recordar</button>`:""}</div></div>${filesHTML(r)}`},
     weights:r=>`<div class="top"><b>${esc(r.kg)} kg</b><span class="muted">${fmt(r.date)}</span></div>`
   }[key];
   M.innerHTML=(key==="weights"?`<div class="card"><h2>Evolución del peso</h2>${chart(p)}</div>`:"")+
     `<div class="card"><div class="head"><h2>${T.title}</h2><button class="btn sm" id="add">+ Agregar</button></div>
     ${list.length?list.map(r=>`<div class="item" data-rec="${r.id}">${line(r)}</div>`).join(""):`<div class="empty">Todavía no hay registros.</div>`}</div>`+
-    (key==="visits"&&list.some(r=>r.cost)?`<p class="muted" style="text-align:center">Gasto total en veterinario: <b>$${list.reduce((s,r)=>s+(+r.cost||0),0).toLocaleString("es-CL")}</b></p>`:"");
+    (key==="visits"&&list.some(r=>r.cost)?`<p class="muted" style="text-align:center">Gasto total en atenciones: <b>$${list.reduce((s,r)=>s+(+r.cost||0),0).toLocaleString("es-CL")}</b></p>`:"");
   $("add").onclick=()=>editRec(key,null);
   M.querySelectorAll("[data-rec]").forEach(el=>el.onclick=()=>editRec(key,p[key].find(r=>r.id===el.dataset.rec)));
   M.querySelectorAll("[data-ics]").forEach(b=>b.onclick=e=>{e.stopPropagation();const r=p[key].find(x=>x.id===b.dataset.ics);
@@ -373,19 +395,48 @@ function vComida(p,M){
   $("feedIcs").onclick=()=>ics(t.map(x=>({title:`Comida de ${p.name}${f.amount?" ("+f.amount+")":""}`,date:today(),time:x,daily:1})),`comida-${p.name}`);
 }
 
-function printReport(p){
-  const tbl=(head,rows)=>rows.length?`<table><tr>${head.map(h=>`<th>${h}</th>`).join("")}</tr>${rows.map(r=>`<tr>${r.map(c=>`<td>${esc(c)}</td>`).join("")}</tr>`).join("")}</table>`:`<p>Sin registros.</p>`;
+function printReport(p,mode){
+  const tbl=(head,rows)=>rows.length?`<table><tr>${head.map(h=>`<th>${h}</th>`).join("")}</tr>${rows.map(r=>`<tr>${r.map(c=>`<td${/^\d\d-\d\d-\d{4}$/.test(c)?' style="white-space:nowrap"':""}>${esc(c)}</td>`).join("")}</tr>`).join("")}</table>`:`<p>Sin registros.</p>`;
   const by=(a,k)=>[...a].sort((x,y)=>(y[k]||"").localeCompare(x[k]||""));
-  $("printArea").innerHTML=`<h1>Ficha de salud · ${esc(p.name)}</h1>
-    <p>${[p.species,p.breed,p.sex,age(p.birth)&&("Edad: "+age(p.birth)),p.birth&&("Nac.: "+fmt(p.birth)),p.chip&&("Microchip: "+p.chip)].filter(Boolean).map(esc).join(" · ")}</p>
-    ${p.allergies?`<p><b>Alergias / condiciones:</b> ${esc(p.allergies)}</p>`:""}
-    <p><b>Alimentación:</b> ${esc([p.feeding.food,p.feeding.amount,parseTimes(p.feeding.times).join(", "),p.feeding.notes].filter(Boolean).join(" · ")||"—")}</p>
-    <h2>Vacunas y antiparasitarios</h2>${tbl(["Fecha","Tipo","Nombre","Próxima dosis","Notas"],by(p.vaccines,"date").map(v=>[fmt(v.date),v.kind,v.name,fmt(v.next),v.notes]))}
-    <h2>Remedios</h2>${tbl(["Remedio","Dosis","Frecuencia","Desde","Hasta","Notas"],by(p.meds,"start").map(m=>[m.name,m.dose,m.freq,fmt(m.start),fmt(m.end),m.notes]))}
-    <h2>Visitas al veterinario</h2>${tbl(["Fecha","Clínica","Motivo","Diagnóstico","Indicaciones"],by(p.visits,"date").map(v=>[fmt(v.date),v.clinic,v.reason,v.diagnosis,v.notes]))}
-    <h2>Peso</h2>${tbl(["Fecha","Peso"],by(p.weights,"date").map(w=>[fmt(w.date),w.kg+" kg"]))}
-    <p style="margin-top:18px;font-size:.8rem">Generado con MiPeludo el ${fmt(today())}</p>`;
+  const w=lastWeight(p),f=p.feeding,times=parseTimes(f.times),care=mode==="cuidador";
+  const head=`<div class="phead">${p.photo?`<img src="${p.photo}" alt="">`:""}<div><h1>${care?"Ficha de cuidados":"Ficha clínica"} · ${esc(p.name)}</h1>
+    <p>${[p.species,p.breed,p.sex,age(p.birth)&&("Edad: "+age(p.birth)),p.birth&&("Nac.: "+fmt(p.birth)),w&&("Peso: "+w.kg+" kg"),p.chip&&("Microchip: "+p.chip)].filter(Boolean).map(esc).join(" · ")}</p></div></div>
+    <table><tr><th>Tutor/a</th><td>${esc([p.owner,p.ownerPhone].filter(Boolean).join(" · ")||"—")}</td></tr><tr><th>Veterinario de cabecera</th><td>${esc([p.vet,p.vetPhone].filter(Boolean).join(" · ")||"—")}</td></tr></table>
+    ${p.allergies?`<p class="palert"><b>⚠ Alergias / condiciones importantes:</b> ${esc(p.allergies)}</p>`:""}`;
+  const conds=care?activeConds(p):by(p.conditions,"since");
+  const condsT=tbl(care?["Diagnóstico","Estado","Cuidados e indicaciones"]:["Diagnóstico","Estado","Desde","Profesional","Indicaciones"],conds.map(c=>care?[c.name,c.status,c.notes]:[c.name,c.status,fmt(c.since),c.pro,c.notes]));
+  const feed=`<table><tr><th>Alimento</th><td>${esc(f.food||"—")}</td></tr><tr><th>Porción</th><td>${esc(f.amount||"—")}</td></tr><tr><th>Horarios</th><td>${esc(times.join(" · ")||"—")}</td></tr>${f.notes?`<tr><th>Notas</th><td>${esc(f.notes)}</td></tr>`:""}</table>`;
+  const vacs=by(p.vaccines,"date");
+  let body;
+  if(care){
+    const latest=vacs.filter((v,i)=>vacs.findIndex(o=>o.name.trim().toLowerCase()===v.name.trim().toLowerCase())===i);
+    body=`<h2>Enfermedades y diagnósticos</h2>${condsT}
+      <h2>Medicamentos que toma actualmente</h2>${tbl(["Remedio","Dosis","Frecuencia","Horarios","Hasta","Notas"],activeMeds(p).map(m=>[m.name,m.dose,m.freq,parseTimes(m.times).join(" · "),fmt(m.end)||"Indefinido",m.notes]))}
+      <h2>Alimentación</h2>${feed}
+      <h2>Carácter y cuidados</h2><p>${esc(p.careNotes||"—")}</p>
+      <h2>Vacunas y antiparasitarios (última dosis)</h2>${tbl(["Nombre","Tipo","Aplicada","Próxima dosis"],latest.map(v=>[v.name,v.kind,fmt(v.date),fmt(v.next)]))}
+      <h2>En caso de emergencia</h2><p>1) Llamar a ${esc(p.owner||"la tutora o tutor")} ${esc(p.ownerPhone)} · 2) Veterinario: ${esc([p.vet,p.vetPhone].filter(Boolean).join(" · ")||"—")}</p>`;
+  }else{
+    body=`<h2>Diagnósticos y enfermedades crónicas</h2>${condsT}
+      <h2>Remedios</h2>${tbl(["Remedio","Dosis","Frecuencia","Desde","Hasta","Notas"],by(p.meds,"start").map(m=>[m.name,m.dose,m.freq,fmt(m.start),fmt(m.end),m.notes]))}
+      <h2>Visitas y atenciones</h2>${tbl(["Fecha","Profesional","Motivo","Diagnóstico","Indicaciones","Adjuntos"],by(p.visits,"date").map(v=>[fmt(v.date),[v.pro,v.clinic].filter(Boolean).join(" · "),v.reason,v.diagnosis,v.notes,(v.files||[]).length||""]))}
+      <h2>Vacunas y antiparasitarios</h2>${tbl(["Fecha","Tipo","Nombre","Próxima dosis","Notas"],vacs.map(v=>[fmt(v.date),v.kind,v.name,fmt(v.next),v.notes]))}
+      <h2>Alimentación</h2>${feed}
+      <h2>Peso</h2>${tbl(["Fecha","Peso"],by(p.weights,"date").map(x=>[fmt(x.date),x.kg+" kg"]))}`;
+  }
+  $("printArea").innerHTML=head+body+`<p style="margin-top:18px;font-size:.8rem">Información registrada por la tutora o tutor en MiPeludo · ${fmt(today())}</p>`;
   window.print();
+}
+function shareSummary(p){
+  const f=p.feeding,t=parseTimes(f.times),L=[`🐾 *${p.name}* — ficha de cuidados`,[p.species,p.breed,age(p.birth)].filter(Boolean).join(" · ")];
+  if(p.allergies)L.push("",`⚠️ *Alergias:* ${p.allergies}`);
+  if(activeConds(p).length)L.push("","*Enfermedades / diagnósticos:*",...activeConds(p).map(c=>`• ${c.name} (${c.status})${c.notes?": "+c.notes:""}`));
+  if(activeMeds(p).length)L.push("","💊 *Medicamentos:*",...activeMeds(p).map(m=>`• ${[m.name,m.dose,m.freq,parseTimes(m.times).join(" y ")].filter(Boolean).join(" · ")}${m.end?" (hasta el "+fmt(m.end)+")":""}${m.notes?". "+m.notes:""}`));
+  if(f.food||t.length)L.push("","🍽️ *Alimentación:* "+[f.food,f.amount,t.join(" y "),f.notes].filter(Boolean).join(" · "));
+  if(p.careNotes)L.push("","🐶 *Cuidados:* "+p.careNotes);
+  L.push("","📞 *Emergencias:* "+[[p.owner,p.ownerPhone].filter(Boolean).join(" "),[p.vet,p.vetPhone].filter(Boolean).join(" ")].filter(Boolean).join(" · "));
+  const text=L.join("\n");
+  if(navigator.share)navigator.share({text}).catch(()=>{});else window.open("https://wa.me/?text="+encodeURIComponent(text),"_blank","noopener");
 }
 
 /* ============ AJUSTES / COPIA DE SEGURIDAD ============ */

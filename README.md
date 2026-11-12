@@ -23,9 +23,12 @@ Cada carpeta trae `index.html` (la app), `landing.html` (página de venta) y `em
 (los 4 emails automáticos).
 
 **MiPeludo** incluye: varias mascotas, vacunas y antiparasitarios con próxima fecha y avisos,
-visitas al veterinario con recetas y exámenes adjuntos (foto o PDF), remedios con horarios,
-alimentación, peso con gráfico, recordatorios al calendario del teléfono (.ics), ficha
-imprimible para el veterinario y copia de seguridad con documentos incluidos.
+visitas al veterinario y a otros profesionales (fisiatra, especialistas, etólogo…) con
+recetas y exámenes adjuntos (foto o PDF), diagnósticos y enfermedades crónicas, remedios con
+horarios, alimentación, peso con gráfico, recordatorios al calendario del teléfono (.ics) y
+copia de seguridad con documentos incluidos. Genera dos fichas para compartir: **ficha
+clínica** para el veterinario y **ficha de cuidados** para hotel canino o cuidador (PDF o
+resumen por WhatsApp). Ejemplos en `apps/ficha-mascotas/ejemplos/`.
 
 **CostoDulce** incluye: ingredientes, recetas, costo real (ingredientes, gastos fijos, horas,
 caja), precio sugerido, y una calculadora guiada del valor de la hora de trabajo.
