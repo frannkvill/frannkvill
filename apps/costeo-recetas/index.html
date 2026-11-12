@@ -44,6 +44,7 @@ td.num,th.num{text-align:right;font-variant-numeric:tabular-nums}
 .big{font-size:2rem;font-weight:800;font-variant-numeric:tabular-nums}
 .kpis{display:grid;gap:10px;grid-template-columns:repeat(auto-fit,minmax(150px,1fr))}
 .kpi{background:var(--bg);border:1px solid var(--line);border-radius:12px;padding:12px}
+.kpi .muted{display:block}
 .kpi b{display:block;font-size:1.25rem;font-variant-numeric:tabular-nums}
 .highlight{background:var(--brand);color:var(--brand-ink);border-color:var(--brand)}
 .highlight .muted{color:inherit;opacity:.85}
@@ -65,7 +66,7 @@ td.num,th.num{text-align:right;font-variant-numeric:tabular-nums}
   <div class="card">
     <div style="font-size:2.4rem">🎂</div>
     <h1>CostoDulce</h1>
-    <p class="muted">Ingresá el código de acceso que te llegó por email al comprar.</p>
+    <p class="muted">Ingresa el código de acceso que te llegó por email al comprar.</p>
     <form id="gateForm">
       <input id="gateCode" autocomplete="one-time-code" placeholder="Tu código" required>
       <p class="err" id="gateErr"></p>
@@ -78,7 +79,7 @@ td.num,th.num{text-align:right;font-variant-numeric:tabular-nums}
   <header>
     <div>
       <h1>🎂 CostoDulce</h1>
-      <div class="muted">Sabé cuánto te cuesta cada torta y a cuánto venderla.</div>
+      <div class="muted">Descubre cuánto te cuesta cada torta y a cuánto venderla.</div>
     </div>
     <select id="currency" aria-label="Moneda" style="width:auto">
       <option value="$">$</option><option value="USD ">USD</option><option value="€">€</option><option value="S/ ">S/</option><option value="Bs ">Bs</option><option value="Q">Q</option>
@@ -100,10 +101,10 @@ td.num,th.num{text-align:right;font-variant-numeric:tabular-nums}
   <!-- INGREDIENTES -->
   <section id="view-ingredientes" class="hidden">
     <div class="card">
-      <h2>Agregar ingrediente</h2>
-      <p class="muted">Cargalo como lo comprás: ej. Harina, paquete de 1000 g a $1.200.</p>
+      <h2>Agregar o actualizar ingrediente</h2>
+      <p class="muted">Ingrésalo como lo compras: ej. Harina, paquete de 1 kg (1000 g) a $1.300. Si ya existe, se actualiza su precio.</p>
       <form id="ingForm" class="row">
-        <label>Nombre<input name="name" required placeholder="Harina 0000"></label>
+        <label>Nombre<input name="name" required placeholder="Harina"></label>
         <label>Precio del paquete<input name="price" type="number" step="any" min="0" required></label>
         <label>Cantidad del paquete<input name="qty" type="number" step="any" min="0.0001" required></label>
         <label>Unidad<select name="unit"><option value="g">gramos (g)</option><option value="ml">mililitros (ml)</option><option value="u">unidades</option></select></label>
@@ -116,6 +117,31 @@ td.num,th.num{text-align:right;font-variant-numeric:tabular-nums}
   <!-- AJUSTES -->
   <section id="view-ajustes" class="hidden">
     <div class="card">
+      <h2>⏱️ ¿Cuánto vale tu hora de trabajo?</h2>
+      <p class="muted">Tu hora no se inventa: sale de cuánto quieres ganar y cuántas horas le dedicas de verdad.</p>
+      <div class="row">
+        <label>Lo que quieres ganar al mes (tu sueldo)<input id="hcSalary" type="number" step="any" min="0" inputmode="decimal"></label>
+        <label>Horas que trabajas a la semana<input id="hcHours" type="number" step="any" min="1" inputmode="decimal"></label>
+        <label>Extra para vacaciones, previsión e imprevistos (%)<input id="hcExtra" type="number" step="any" min="0" inputmode="decimal"></label>
+      </div>
+      <div class="kpis" style="margin-top:12px">
+        <div class="kpi highlight"><span class="muted">Tu hora debería valer</span><b class="big" id="hcResult">—</b></div>
+        <div class="kpi"><span class="muted">Cómo se calcula</span><span id="hcFormula" style="font-size:.9rem"></span></div>
+      </div>
+      <div class="actions"><button class="btn" id="hcApply">Usar este valor en mis recetas</button></div>
+      <details style="margin-top:12px"><summary style="cursor:pointer;font-weight:600">Cómo calcular bien tu hora (guía rápida)</summary>
+        <ul class="muted" style="padding-left:18px;line-height:1.6">
+          <li><b>Parte por tu sueldo, no por el precio.</b> Piensa cuánto necesitas ganar al mes para que el negocio valga la pena.</li>
+          <li><b>Cuenta todas las horas:</b> comprar, preparar, hornear, decorar, limpiar, responder mensajes y entregar. No solo el tiempo frente al horno.</li>
+          <li><b>En cada receta</b> anota solo el tiempo en que realmente trabajas en ella. Si la torta se hornea 1 hora mientras haces otra cosa, no la cuentes completa.</li>
+          <li><b>Suma un extra</b> (15–25%) para vacaciones, días malos, cotizaciones e imprevistos: nadie factura todas las semanas del año.</li>
+          <li><b>Tu hora no es tu ganancia.</b> La hora te paga a ti; el % de ganancia es para que el negocio crezca (mejor horno, más moldes, publicidad).</li>
+          <li><b>Revísala cada 6 meses</b> o cuando suban tus gastos.</li>
+        </ul>
+        <p class="muted"><b>Ejemplo:</b> quieres ganar $600.000 al mes y trabajas 25 horas a la semana (unas 108 al mes). Con 20% extra: $720.000 ÷ 108 = <b>$6.650 la hora</b>.</p>
+      </details>
+    </div>
+    <div class="card">
       <h2>Valores por defecto para recetas nuevas</h2>
       <div class="row">
         <label>Tu hora de trabajo vale<input id="defRate" type="number" step="any" min="0"></label>
@@ -125,7 +151,7 @@ td.num,th.num{text-align:right;font-variant-numeric:tabular-nums}
     </div>
     <div class="card">
       <h2>Copia de seguridad</h2>
-      <p class="muted">Tus datos se guardan solo en este dispositivo. Descargá una copia para pasarlos a otro celular o computadora.</p>
+      <p class="muted">Tus datos se guardan solo en este dispositivo. Descarga una copia para pasarlos a otro celular o computador.</p>
       <div class="actions">
         <button class="btn" id="exportBtn">Descargar copia</button>
         <label class="btn ghost" style="flex-direction:row;color:var(--ink)">Restaurar copia<input type="file" id="importFile" accept="application/json" hidden></label>
@@ -139,11 +165,11 @@ td.num,th.num{text-align:right;font-variant-numeric:tabular-nums}
 /* ============ CONFIG DEL VENDEDOR ============
    ACCESS_HASHES: SHA-256 de los códigos válidos (en minúsculas).
    Generar uno:  echo -n "TUCODIGO" | sha256sum
-   El hash de abajo corresponde al código de demo: DULCE2026  (cambialo antes de vender). */
+   El hash de abajo corresponde al código de demo: DULCE2026  (cámbialo antes de vender). */
 const ACCESS_HASHES = [
   "f541fc2cb935d9e48ceeb0a14d24ad7a34dac48f8f8e1d8e3f926b71a5959660"
 ];
-const STORE_KEY = "costodulce.v1";
+const STORE_KEY = "costodulce.v2";
 const ACCESS_KEY = "costodulce.access";
 
 /* ============ ACCESO ============ */
@@ -160,7 +186,7 @@ function unlock(){ document.getElementById("gate").remove(); document.getElement
     e.preventDefault();
     const code=document.getElementById("gateCode").value;
     if(await isValid(code)){ try{localStorage.setItem(ACCESS_KEY,code.trim().toUpperCase())}catch(e){} unlock(); }
-    else document.getElementById("gateErr").textContent="Código incorrecto. Revisá el email de tu compra.";
+    else document.getElementById("gateErr").textContent="Código incorrecto. Revisa el email de tu compra.";
   });
 })();
 
@@ -168,14 +194,14 @@ function unlock(){ document.getElementById("gate").remove(); document.getElement
 const uid=()=>Math.random().toString(36).slice(2,10);
 const DEFAULT_STATE={
   currency:"$",
-  defaults:{rate:3000,margin:40,overhead:10},
+  defaults:{rate:4000,margin:40,overhead:10},
   ingredients:[
-    {id:uid(),name:"Harina 0000",price:1200,qty:1000,unit:"g"},
-    {id:uid(),name:"Azúcar",price:1500,qty:1000,unit:"g"},
-    {id:uid(),name:"Manteca",price:2800,qty:200,unit:"g"},
-    {id:uid(),name:"Huevos",price:4200,qty:30,unit:"u"},
-    {id:uid(),name:"Leche",price:1400,qty:1000,unit:"ml"},
-    {id:uid(),name:"Dulce de leche",price:3500,qty:1000,unit:"g"}
+    {id:uid(),name:"Harina",price:1300,qty:1000,unit:"g"},
+    {id:uid(),name:"Azúcar",price:1400,qty:1000,unit:"g"},
+    {id:uid(),name:"Mantequilla",price:2900,qty:250,unit:"g"},
+    {id:uid(),name:"Huevos",price:6500,qty:30,unit:"u"},
+    {id:uid(),name:"Leche",price:1100,qty:1000,unit:"ml"},
+    {id:uid(),name:"Manjar",price:3800,qty:1000,unit:"g"}
   ],
   recipes:[]
 };
@@ -187,8 +213,8 @@ function load(){
 function save(){ try{localStorage.setItem(STORE_KEY,JSON.stringify(S))}catch(e){} }
 function seedRecipe(){
   const by=n=>S.ingredients.find(i=>i.name===n).id;
-  S.recipes.push({id:uid(),name:"Torta de ejemplo (borrala cuando quieras)",yield:12,hours:2,rate:S.defaults.rate,margin:S.defaults.margin,overhead:S.defaults.overhead,packaging:1500,
-    items:[{ing:by("Harina 0000"),qty:300},{ing:by("Azúcar"),qty:250},{ing:by("Manteca"),qty:200},{ing:by("Huevos"),qty:4},{ing:by("Leche"),qty:150},{ing:by("Dulce de leche"),qty:500}]});
+  S.recipes.push({id:uid(),name:"Torta de manjar (ejemplo, bórrala cuando quieras)",yield:12,hours:2,rate:S.defaults.rate,margin:S.defaults.margin,overhead:S.defaults.overhead,packaging:1500,
+    items:[{ing:by("Harina"),qty:300},{ing:by("Azúcar"),qty:250},{ing:by("Mantequilla"),qty:200},{ing:by("Huevos"),qty:4},{ing:by("Leche"),qty:150},{ing:by("Manjar"),qty:500}]});
 }
 
 /* ============ CÁLCULOS ============ */
@@ -203,7 +229,7 @@ function calc(r){
   const y=Math.max(1,+r.yield||1);
   return {ingCost,overhead,labor,packaging,total,price,perPortion:price/y,costPortion:total/y,profit:price-total};
 }
-const money=n=>S.currency+(Math.round(n)).toLocaleString("es-AR");
+const money=n=>S.currency+(Math.round(n)).toLocaleString("es-CL");
 const esc=s=>String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 
 /* ============ VISTAS ============ */
@@ -222,7 +248,7 @@ function renderRecipes(){
   list.classList.remove("hidden");ed.classList.add("hidden");
   list.innerHTML=`<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px"><h2 style="margin:0">Mis recetas</h2><button class="btn" id="newRecipe">+ Nueva receta</button></div>`+
     (S.recipes.length?S.recipes.map(r=>{const c=calc(r);return `<div class="list-item" data-id="${r.id}"><div><b>${esc(r.name)}</b><div class="muted">${r.yield} porciones · costo ${money(c.total)}</div></div><div style="text-align:right"><b>${money(c.price)}</b><div class="muted">precio sugerido</div></div></div>`}).join("")
-    :`<div class="empty">Todavía no tenés recetas. Creá la primera 👆</div>`);
+    :`<div class="empty">Todavía no tienes recetas. Crea la primera 👆</div>`);
   list.querySelector("#newRecipe").onclick=()=>{
     const r={id:uid(),name:"Nueva receta",yield:1,hours:1,rate:S.defaults.rate,margin:S.defaults.margin,overhead:S.defaults.overhead,packaging:0,items:[]};
     S.recipes.unshift(r);save();editing=r.id;renderRecipes();
@@ -251,8 +277,8 @@ function renderEditor(){
     <h2>Ingredientes de esta receta</h2>
     ${S.ingredients.length?`<form id="addItem" class="row" style="margin-bottom:10px">
       <label>Ingrediente<select name="ing">${opts}</select></label>
-      <label>Cantidad que usás<input name="qty" type="number" step="any" min="0" required></label>
-      <button class="btn">Agregar</button></form>`:`<p class="muted">Primero cargá ingredientes en la pestaña Ingredientes.</p>`}
+      <label>Cantidad que usas<input name="qty" type="number" step="any" min="0" required></label>
+      <button class="btn">Agregar</button></form>`:`<p class="muted">Primero agrega ingredientes en la pestaña Ingredientes.</p>`}
     <div class="table-scroll"><table><thead><tr><th>Ingrediente</th><th class="num">Cantidad</th><th class="num">Costo</th><th></th></tr></thead><tbody id="items"></tbody></table></div>
   </div>
   <div class="card" id="result"></div>
@@ -273,7 +299,7 @@ function renderItems(r){
   const tb=document.getElementById("items");
   tb.innerHTML=r.items.length?r.items.map((it,k)=>{const i=S.ingredients.find(x=>x.id===it.ing);if(!i)return `<tr><td colspan="3" class="muted">Ingrediente eliminado</td><td><button class="btn danger sm" data-rm="${k}">✕</button></td></tr>`;
     return `<tr><td>${esc(i.name)}</td><td class="num" style="white-space:nowrap"><input data-q="${k}" type="number" step="any" min="0" value="${it.qty}" style="width:72px;text-align:right"> ${i.unit}</td><td class="num">${money(unitCost(i)*it.qty)}</td><td><button class="btn danger sm" data-rm="${k}" aria-label="Quitar">✕</button></td></tr>`}).join("")
-    :`<tr><td colspan="4" class="empty">Agregá los ingredientes que usa esta receta.</td></tr>`;
+    :`<tr><td colspan="4" class="empty">Agrega los ingredientes que usa esta receta.</td></tr>`;
   tb.querySelectorAll("[data-rm]").forEach(b=>b.onclick=()=>{r.items.splice(+b.dataset.rm,1);save();renderItems(r);renderResult(r)});
   tb.querySelectorAll("[data-q]").forEach(inp=>inp.onchange=()=>{r.items[+inp.dataset.q].qty=+inp.value;save();renderItems(r);renderResult(r)});
 }
@@ -294,20 +320,37 @@ function renderResult(r){
       <tr><td><b>Costo total</b></td><td class="num"><b>${money(c.total)}</b></td></tr>
       <tr><td>Costo por porción</td><td class="num">${money(c.costPortion)}</td></tr>
     </table></div>
-    <p class="muted">💡 Si hoy cobrás menos de ${money(c.total)}, estás perdiendo plata con esta receta.</p>`;
+    <p class="muted">💡 Si hoy cobras menos de ${money(c.total)}, estás perdiendo plata con esta receta.</p>`;
 }
 
 function renderIngredients(){
   const el=document.getElementById("ingList");
   if(!S.ingredients.length){el.innerHTML=`<div class="empty">Sin ingredientes todavía.</div>`;return}
   el.innerHTML=`<div class="table-scroll"><table><thead><tr><th>Nombre</th><th class="num">Precio</th><th class="num">Paquete</th><th class="num">Costo x unidad</th><th></th></tr></thead><tbody>${
-    S.ingredients.map(i=>`<tr><td>${esc(i.name)}</td><td class="num"><input data-id="${i.id}" data-k="price" type="number" step="any" min="0" value="${i.price}" style="width:100px;text-align:right"></td><td class="num">${i.qty} ${i.unit}</td><td class="num">${S.currency}${unitCost(i).toLocaleString("es-AR",{maximumFractionDigits:2})}/${i.unit}</td><td><button class="btn danger sm" data-del="${i.id}" aria-label="Eliminar">✕</button></td></tr>`).join("")
-  }</tbody></table></div><p class="muted">Cuando suban los precios, actualizá el precio acá y todas tus recetas se recalculan solas.</p>`;
+    S.ingredients.map(i=>`<tr><td>${esc(i.name)}</td><td class="num"><input data-id="${i.id}" data-k="price" type="number" step="any" min="0" value="${i.price}" style="width:100px;text-align:right"></td><td class="num">${i.qty} ${i.unit}</td><td class="num">${S.currency}${unitCost(i).toLocaleString("es-CL",{maximumFractionDigits:2})}/${i.unit}</td><td><button class="btn danger sm" data-del="${i.id}" aria-label="Eliminar">✕</button></td></tr>`).join("")
+  }</tbody></table></div><p class="muted">Cuando suban los precios, actualiza el precio aquí y todas tus recetas se recalculan solas.</p>`;
   el.querySelectorAll("[data-k]").forEach(inp=>inp.onchange=()=>{S.ingredients.find(x=>x.id===inp.dataset.id).price=+inp.value;save();renderIngredients()});
   el.querySelectorAll("[data-del]").forEach(b=>b.onclick=()=>{if(confirm("¿Eliminar ingrediente?")){S.ingredients=S.ingredients.filter(x=>x.id!==b.dataset.del);save();renderIngredients()}});
 }
 
+function hourCalc(){
+  const h=S.hourCalc,monthly=h.hours*4.33,rate=monthly>0?h.salary*(1+h.extra/100)/monthly:0;
+  return {monthly,rate:Math.round(rate/50)*50};
+}
+function renderHourCalc(){
+  S.hourCalc=S.hourCalc||{salary:600000,hours:25,extra:20};
+  const ids={hcSalary:"salary",hcHours:"hours",hcExtra:"extra"};
+  const paint=()=>{const c=hourCalc(),h=S.hourCalc;
+    document.getElementById("hcResult").textContent=money(c.rate);
+    document.getElementById("hcFormula").innerHTML=`${money(h.salary)} + ${h.extra}% = ${money(h.salary*(1+h.extra/100))}<br>÷ ${Math.round(c.monthly)} horas al mes`};
+  for(const [id,k] of Object.entries(ids)){const inp=document.getElementById(id);inp.value=S.hourCalc[k];inp.oninput=()=>{S.hourCalc[k]=+inp.value||0;save();paint()}}
+  document.getElementById("hcApply").onclick=()=>{const r=hourCalc().rate;if(!r)return;S.defaults.rate=r;
+    if(S.recipes.length&&confirm(`¿Aplicar ${money(r)} la hora también a tus ${S.recipes.length} receta(s) ya creadas?`))S.recipes.forEach(x=>x.rate=r);
+    save();renderSettings();alert("Listo ✔ Tu hora ahora vale "+money(r))};
+  paint();
+}
 function renderSettings(){
+  renderHourCalc();
   const map={defRate:"rate",defMargin:"margin",defOverhead:"overhead"};
   for(const [id,k] of Object.entries(map)){const inp=document.getElementById(id);inp.value=S.defaults[k];inp.oninput=()=>{S.defaults[k]=+inp.value;save()}}
 }
@@ -318,7 +361,10 @@ function init(){
   cur.onchange=()=>{S.currency=cur.value;save();show(document.querySelector(".tab[aria-selected=true]").dataset.view)};
   document.querySelectorAll(".tab").forEach(t=>t.onclick=()=>show(t.dataset.view));
   document.getElementById("ingForm").onsubmit=e=>{e.preventDefault();const fd=new FormData(e.target);
-    S.ingredients.push({id:uid(),name:fd.get("name").trim(),price:+fd.get("price"),qty:+fd.get("qty"),unit:fd.get("unit")});save();e.target.reset();renderIngredients()};
+    const n={name:fd.get("name").trim(),price:+fd.get("price"),qty:+fd.get("qty"),unit:fd.get("unit")};
+    const ex=S.ingredients.find(i=>i.name.trim().toLowerCase()===n.name.toLowerCase()&&i.unit===n.unit);
+    if(ex)Object.assign(ex,n);else S.ingredients.push({id:uid(),...n});
+    save();e.target.reset();renderIngredients();e.target.elements.name.focus()};
   document.getElementById("exportBtn").onclick=()=>{const a=document.createElement("a");a.href=URL.createObjectURL(new Blob([JSON.stringify(S,null,2)],{type:"application/json"}));a.download="costodulce-copia.json";a.click()};
   document.getElementById("importFile").onchange=e=>{const f=e.target.files[0];if(!f)return;f.text().then(t=>{try{const d=JSON.parse(t);if(!d.recipes||!d.ingredients)throw 0;S=d;save();alert("Copia restaurada ✔");show("recetas")}catch(_){alert("Ese archivo no es una copia válida.")}})};
   document.getElementById("resetBtn").onclick=()=>{if(confirm("Esto borra todas tus recetas e ingredientes de este dispositivo. ¿Seguro?")){try{localStorage.removeItem(STORE_KEY)}catch(e){}S=null;load();show("recetas")}};
