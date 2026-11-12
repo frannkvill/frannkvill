@@ -1,0 +1,469 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex">
+<meta name="theme-color" content="#0d9488">
+<title>MiPeludo · Ficha de salud de tu mascota</title>
+<style>
+:root{
+  --bg:#f5f8f7; --card:#ffffff; --ink:#16211f; --muted:#5d6b68; --line:#dfe7e5;
+  --brand:#0d9488; --brand-ink:#ffffff; --ok:#15803d; --warn:#b45309; --bad:#b91c1c;
+  --warn-bg:#fef3c7; --bad-bg:#fee2e2; --ok-bg:#dcfce7;
+  --radius:14px; --shadow:0 1px 2px rgba(0,0,0,.05),0 4px 16px rgba(0,0,0,.04);
+}
+@media (prefers-color-scheme: dark){
+  :root{--bg:#0f1514;--card:#182120;--ink:#eef4f3;--muted:#9aaaa6;--line:#2a3735;--brand:#2dd4bf;--brand-ink:#04211e;
+  --warn:#fbbf24;--bad:#f87171;--ok:#4ade80;--warn-bg:#3b2f10;--bad-bg:#3f1d1d;--ok-bg:#12331f}
+}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+button,input,select,textarea{font:inherit;color:inherit}
+.wrap{max-width:760px;margin:0 auto;padding:16px 16px 96px}
+header{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:12px}
+h1{font-size:1.3rem;margin:0}
+h2{font-size:1.05rem;margin:0 0 10px}
+.muted{color:var(--muted);font-size:.9rem}
+.card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:16px;margin-bottom:14px;box-shadow:var(--shadow)}
+.chips,.tabs{display:flex;gap:6px;margin-bottom:12px;overflow-x:auto;padding-bottom:2px}
+.chip,.tab{border:1px solid var(--line);background:var(--card);padding:8px 14px;border-radius:999px;cursor:pointer;white-space:nowrap}
+.chip[aria-pressed=true]{border-color:var(--brand);box-shadow:inset 0 0 0 1px var(--brand);font-weight:600}
+.tab[aria-selected=true]{background:var(--brand);color:var(--brand-ink);border-color:var(--brand)}
+.row{display:grid;gap:10px;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));align-items:end}
+.row .full{grid-column:1/-1}
+label{display:flex;flex-direction:column;gap:4px;font-size:.85rem;color:var(--muted)}
+input,select,textarea{background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:9px 10px;min-width:0;width:100%;color:var(--ink)}
+input:focus,select:focus,textarea:focus{outline:2px solid var(--brand);outline-offset:1px}
+.btn{border:0;background:var(--brand);color:var(--brand-ink);padding:10px 16px;border-radius:10px;cursor:pointer;font-weight:600;display:inline-flex;flex-direction:row;align-items:center;gap:6px;font-size:1rem;text-decoration:none}
+.btn.ghost{background:transparent;color:var(--ink);border:1px solid var(--line)}
+.btn.sm{padding:6px 10px;font-size:.85rem;white-space:nowrap}
+.btn.danger{background:transparent;color:var(--bad);border:1px solid var(--line)}
+.head{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:6px}
+.head h2{margin:0}
+.item{padding:12px 0;border-bottom:1px solid var(--line);cursor:pointer}
+.item:last-child{border-bottom:0}
+.item .top{display:flex;justify-content:space-between;gap:8px;align-items:flex-start}
+.badge{display:inline-block;border-radius:999px;padding:2px 10px;font-size:.78rem;font-weight:600;white-space:nowrap;background:var(--bg);border:1px solid var(--line)}
+.badge.bad{background:var(--bad-bg);color:var(--bad);border-color:transparent}
+.badge.warn{background:var(--warn-bg);color:var(--warn);border-color:transparent}
+.badge.ok{background:var(--ok-bg);color:var(--ok);border-color:transparent}
+.empty{text-align:center;padding:22px 8px;color:var(--muted)}
+.actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+.petcard{display:flex;gap:14px;align-items:center}
+.avatar{width:72px;height:72px;border-radius:50%;background:var(--bg);border:1px solid var(--line);display:grid;place-items:center;font-size:2.2rem;object-fit:cover;flex:none}
+.alert{background:var(--warn-bg);color:var(--warn);border-radius:10px;padding:8px 12px;margin-top:10px;font-size:.92rem}
+.files{display:flex;gap:6px;flex-wrap:wrap;margin-top:6px}
+.file{border:1px solid var(--line);background:var(--bg);border-radius:8px;padding:4px 8px;font-size:.82rem;cursor:pointer;display:inline-flex;gap:6px;align-items:center;max-width:100%}
+.file span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:180px}
+.file b{color:var(--bad);cursor:pointer}
+.filebox{margin-top:12px;border:1px dashed var(--line);border-radius:12px;padding:12px}
+dialog{border:1px solid var(--line);border-radius:16px;background:var(--card);color:var(--ink);padding:18px;width:min(560px,calc(100vw - 24px));max-height:calc(100vh - 24px)}
+dialog::backdrop{background:rgba(0,0,0,.5)}
+#viewer img{max-width:100%;border-radius:10px;display:block}
+svg text{fill:var(--muted);font-size:10px}
+.hidden{display:none!important}
+#printArea{display:none}
+/* acceso */
+#gate{position:fixed;inset:0;background:var(--bg);display:grid;place-items:center;padding:16px;z-index:10}
+#gate .card{max-width:380px;width:100%;text-align:center}
+#gate .err{color:var(--bad);min-height:1.2em;font-size:.9rem}
+@media print{
+  body>*{display:none!important}
+  #printArea{display:block!important;padding:16px;color:#000;background:#fff}
+  #printArea h1{font-size:1.4rem;margin:0 0 4px} #printArea h2{margin:18px 0 6px;border-bottom:1px solid #999;padding-bottom:2px}
+  #printArea table{width:100%;border-collapse:collapse;font-size:.9rem} #printArea td,#printArea th{text-align:left;padding:4px 6px;border-bottom:1px solid #ddd;vertical-align:top}
+  #printArea .phead{display:flex;gap:14px;align-items:center} #printArea .phead img{width:80px;height:80px;border-radius:50%;object-fit:cover} #printArea .phead p{margin:0}
+  #printArea .palert{border:2px solid #b45309;border-radius:8px;padding:8px 10px}
+  #printArea table{margin-top:8px} #printArea tr>th:first-child:not(:only-child){white-space:nowrap}
+}
+</style>
+</head>
+<body>
+
+<!-- Pantalla de acceso: solo entra quien tiene el código que llega por email al comprar -->
+<div id="gate">
+  <div class="card">
+    <div style="font-size:2.4rem">🐾</div>
+    <h1>MiPeludo</h1>
+    <p class="muted">Ingresa el código de acceso que te llegó por email al comprar.</p>
+    <form id="gateForm">
+      <input id="gateCode" autocomplete="one-time-code" placeholder="Tu código" required>
+      <p class="err" id="gateErr"></p>
+      <button class="btn" style="width:100%;justify-content:center">Entrar</button>
+    </form>
+  </div>
+</div>
+
+<div class="wrap" id="app" hidden>
+  <header>
+    <div><h1>🐾 MiPeludo</h1><div class="muted">Toda la salud de tu mascota en un solo lugar.</div></div>
+    <button class="btn ghost sm" id="settingsBtn" aria-label="Ajustes y copia de seguridad">⚙️ Ajustes</button>
+  </header>
+  <div class="chips" id="pets"></div>
+  <nav class="tabs" id="tabs" role="tablist"></nav>
+  <main id="main"></main>
+</div>
+
+<dialog id="dlg"><form id="dlgForm"></form></dialog>
+<dialog id="viewer"></dialog>
+<div id="printArea"></div>
+
+<script>
+/* ============ CONFIG DEL VENDEDOR ============
+   ACCESS_HASHES: SHA-256 de los códigos válidos (en mayúsculas).
+   Generar uno:  echo -n "TUCODIGO" | sha256sum
+   El hash de abajo corresponde al código de demo: PELUDO2026  (cámbialo antes de vender). */
+const ACCESS_HASHES = ["8c9831f143e78409ff3e68e5c852d32a48b46a0d546ab95341b1f1348eb6069f"];
+const STORE_KEY="mipeludo.v1", ACCESS_KEY="mipeludo.access";
+
+/* ============ ACCESO ============ */
+async function sha256(t){const b=await crypto.subtle.digest("SHA-256",new TextEncoder().encode(t));return [...new Uint8Array(b)].map(x=>x.toString(16).padStart(2,"0")).join("")}
+async function isValid(c){return ACCESS_HASHES.includes(await sha256(c.trim().toUpperCase()))}
+function unlock(){document.getElementById("gate").remove();document.getElementById("app").hidden=false;init()}
+(async()=>{
+  let saved=null;try{saved=localStorage.getItem(ACCESS_KEY)}catch(e){}
+  if(saved&&await isValid(saved))return unlock();
+  document.getElementById("gateForm").addEventListener("submit",async e=>{
+    e.preventDefault();const c=document.getElementById("gateCode").value;
+    if(await isValid(c)){try{localStorage.setItem(ACCESS_KEY,c.trim().toUpperCase())}catch(e){}unlock()}
+    else document.getElementById("gateErr").textContent="Código incorrecto. Revisa el email de tu compra.";
+  });
+})();
+
+/* ============ UTILIDADES ============ */
+const $=id=>document.getElementById(id);
+const uid=()=>Math.random().toString(36).slice(2,10);
+const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const iso=d=>{d=new Date(d);d.setMinutes(d.getMinutes()-d.getTimezoneOffset());return d.toISOString().slice(0,10)};
+const today=()=>iso(new Date());
+const addDays=n=>iso(Date.now()+n*864e5);
+const fmt=d=>d?d.split("-").reverse().join("-"):"";
+const daysTo=d=>Math.round((Date.parse(d)-Date.parse(today()))/864e5);
+const EMOJI={Perro:"🐶",Gato:"🐱",Conejo:"🐰",Ave:"🐦",Otro:"🐾"};
+function age(b){if(!b)return"";let m=(new Date().getFullYear()-+b.slice(0,4))*12+(new Date().getMonth()+1-+b.slice(5,7));if(new Date().getDate()<+b.slice(8,10))m--;if(m<0)return"";
+  const y=Math.floor(m/12);return y?`${y} año${y>1?"s":""}${m%12?` y ${m%12} mes${m%12>1?"es":""}`:""}`:`${m} mes${m===1?"":"es"}`}
+const parseTimes=s=>(s||"").split(/[,;\s]+/).filter(t=>/^\d{1,2}:\d{2}$/.test(t)).map(t=>t.padStart(5,"0")).sort();
+function download(content,type,name){const a=document.createElement("a");a.href=URL.createObjectURL(content instanceof Blob?content:new Blob([content],{type}));a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),5000)}
+
+/* ============ ARCHIVOS (IndexedDB) ============ */
+const idb=(()=>{let p;
+  const open=()=>p||(p=new Promise((res,rej)=>{const r=indexedDB.open("mipeludo",1);r.onupgradeneeded=()=>r.result.createObjectStore("files");r.onsuccess=()=>res(r.result);r.onerror=()=>rej(r.error)}));
+  const tx=async(mode,fn)=>{const db=await open();return new Promise((res,rej)=>{const t=db.transaction("files",mode);const rq=fn(t.objectStore("files"));t.oncomplete=()=>res(rq&&rq.result);t.onerror=()=>rej(t.error)})};
+  return{put:(k,v)=>tx("readwrite",s=>s.put(v,k)),get:k=>tx("readonly",s=>s.get(k)),del:k=>tx("readwrite",s=>s.delete(k)),clear:()=>tx("readwrite",s=>s.clear())}})();
+async function compress(file,max){
+  if(!file.type.startsWith("image/"))return file;
+  try{const bmp=await createImageBitmap(file);const k=Math.min(1,max/Math.max(bmp.width,bmp.height));
+    const c=document.createElement("canvas");c.width=Math.round(bmp.width*k);c.height=Math.round(bmp.height*k);c.getContext("2d").drawImage(bmp,0,0,c.width,c.height);
+    return await new Promise(r=>c.toBlob(b=>r(b||file),"image/jpeg",.82))}catch(e){return file}
+}
+const toDataURL=blob=>new Promise((res,rej)=>{const r=new FileReader();r.onload=()=>res(r.result);r.onerror=rej;r.readAsDataURL(blob)});
+async function fromDataURL(u){return (await fetch(u)).blob()}
+async function viewFile(f){
+  const blob=await idb.get(f.id);const v=$("viewer");
+  if(!blob){alert("No se encontró el archivo en este dispositivo.");return}
+  const url=URL.createObjectURL(blob);
+  v.innerHTML=`<h2>${esc(f.name)}</h2>${blob.type.startsWith("image/")?`<img src="${url}" alt="">`:`<p class="muted">Documento PDF</p>`}
+    <div class="actions"><a class="btn" href="${url}" target="_blank" rel="noopener">Abrir</a><a class="btn ghost" href="${url}" download="${esc(f.name)}">Descargar</a><button class="btn ghost" id="vclose">Cerrar</button></div>`;
+  v.querySelector("#vclose").onclick=()=>v.close();v.onclose=()=>URL.revokeObjectURL(url);v.showModal();
+}
+
+/* ============ DATOS ============ */
+let S, view="resumen";
+const newPet=d=>({id:uid(),name:"",species:"Perro",breed:"",birth:"",sex:"",chip:"",allergies:"",vet:"",vetPhone:"",owner:"",ownerPhone:"",careNotes:"",photo:"",vaccines:[],visits:[],conditions:[],meds:[],weights:[],feeding:{food:"",amount:"",times:"",notes:""},...d});
+function seed(){
+  return{current:null,pets:[newPet({name:"Luna (ejemplo)",species:"Perro",breed:"Mestiza",birth:addDays(-1200),sex:"Hembra",chip:"985 112 004 567 890",allergies:"Alergia al pollo",vet:"Clínica Veterinaria Los Aromos",vetPhone:"+56 9 1234 5678",owner:"Camila Soto",ownerPhone:"+56 9 8765 4321",careNotes:"Es cariñosa pero tímida con perros grandes. Le asustan los ruidos fuertes. Pasea 2 veces al día con arnés. No subir escaleras ni saltar (cadera).",
+    conditions:[{id:uid(),name:"Dermatitis alérgica alimentaria",since:addDays(-40),status:"En tratamiento",pro:"Dra. Rojas · Clínica Los Aromos",notes:"Alimento hipoalergénico de por vida. Evitar pollo y premios comerciales."},{id:uid(),name:"Displasia de cadera leve",since:addDays(-400),status:"Controlada",pro:"Felipe Muñoz · Fisiatra",notes:"Fisioterapia cada 15 días. Mantener peso bajo 13 kg. Evitar saltos."}],
+    vaccines:[{id:uid(),kind:"Vacuna",name:"Óctuple",date:addDays(-350),next:addDays(15),notes:""},{id:uid(),kind:"Vacuna",name:"Antirrábica",date:addDays(-200),next:addDays(165),notes:""},{id:uid(),kind:"Antiparasitario interno",name:"Pastilla antiparasitaria",date:addDays(-95),next:addDays(-5),notes:""}],
+    visits:[{id:uid(),date:addDays(-12),pro:"Fisiatra / kinesiólogo",clinic:"Felipe Muñoz · RehabCan",reason:"Sesión de fisioterapia de cadera",diagnosis:"Buena evolución, mejor rango de movimiento",notes:"Ejercicios en casa 10 min al día. Próxima sesión en 15 días.",cost:"22000",files:[]},{id:uid(),date:addDays(-40),pro:"Veterinario",clinic:"Clínica Los Aromos · Dra. Rojas",reason:"Picazón y enrojecimiento en la piel",diagnosis:"Dermatitis alérgica por alimento",notes:"Cambiar a alimento hipoalergénico. Control en 2 meses.",cost:"28000",files:[]}],
+    meds:[{id:uid(),name:"Antihistamínico",dose:"1/2 comprimido",freq:"Cada 12 horas",times:"09:00, 21:00",start:addDays(-3),end:addDays(4),notes:"Dar con comida",files:[]}],
+    weights:[{id:uid(),date:addDays(-300),kg:"11.2"},{id:uid(),date:addDays(-180),kg:"12.1"},{id:uid(),date:addDays(-40),kg:"12.8"}],
+    feeding:{food:"Alimento hipoalergénico de salmón",amount:"120 g por porción",times:"08:00, 20:00",notes:"Sin premios con pollo"}})]};
+}
+function load(){try{S=JSON.parse(localStorage.getItem(STORE_KEY))}catch(e){} if(!S||!S.pets){S=seed();save()} S.pets=S.pets.map(p=>({...newPet({}),...p})); if(!pet()&&S.pets[0])S.current=S.pets[0].id}
+function save(){try{localStorage.setItem(STORE_KEY,JSON.stringify(S))}catch(e){alert("No se pudo guardar: el almacenamiento del dispositivo está lleno.")}}
+const pet=()=>S.pets.find(p=>p.id===S.current);
+
+/* ============ FORMULARIO GENÉRICO ============ */
+function fieldHTML(f,v){
+  const val=esc(v??"");
+  if(f.type==="select")return `<label>${f.label}<select name="${f.k}">${f.opts.map(o=>`<option${o===v?" selected":""}>${o}</option>`).join("")}</select></label>`;
+  if(f.type==="textarea")return `<label class="full">${f.label}<textarea name="${f.k}" rows="3" placeholder="${f.ph||""}">${val}</textarea></label>`;
+  if(f.type==="photo")return `<label class="full">${f.label}<input type="file" accept="image/*" id="photoIn"></label>`;
+  return `<label class="${f.full?"full":""}">${f.label}<input name="${f.k}" type="${f.type||"text"}" ${f.type==="number"?'step="any" min="0" inputmode="decimal"':""} placeholder="${f.ph||""}" value="${val}" ${f.req?"required":""}></label>`;
+}
+function openForm(o){
+  const D=$("dlg"),F=$("dlgForm"),rec=o.rec||{};
+  let files=[...(rec.files||[])],added=[],removed=[];
+  F.innerHTML=`<h2>${o.title}</h2><div class="row">${o.fields.map(f=>fieldHTML(f,rec[f.k]??f.def)).join("")}</div>`+
+    (o.files?`<div class="filebox"><div class="files" id="fchips"></div><label class="btn ghost sm" style="margin-top:8px">📎 Adjuntar foto o PDF<input type="file" id="fin" accept="image/*,application/pdf" multiple hidden></label><p class="muted" style="margin:6px 0 0">Receta, informe de exámenes, radiografía, boleta…</p></div>`:"")+
+    `<div class="actions"><button class="btn">Guardar</button><button type="button" class="btn ghost" id="fcancel">Cancelar</button>${o.rec&&o.onDelete?'<button type="button" class="btn danger" id="fdel">Eliminar</button>':""}</div>`;
+  const chips=()=>{const el=F.querySelector("#fchips");if(!el)return;el.innerHTML=files.map((f,i)=>`<span class="file"><span>${f.type==="application/pdf"?"📄":"🖼️"} ${esc(f.name)}</span><b data-i="${i}" role="button" aria-label="Quitar">✕</b></span>`).join("");
+    el.querySelectorAll("b").forEach(b=>b.onclick=()=>{const [f]=files.splice(+b.dataset.i,1);removed.push(f.id);chips()})};
+  chips();
+  const fin=F.querySelector("#fin");
+  if(fin)fin.onchange=async()=>{for(const file of fin.files){if(file.size>15*1024*1024){alert(file.name+" pesa más de 15 MB.");continue}
+      const blob=await compress(file,1600),id=uid();
+      try{await idb.put(id,blob)}catch(e){alert("No se pudo guardar el archivo.");continue}
+      files.push({id,name:file.name,type:blob.type||file.type});added.push(id)}
+    fin.value="";chips()};
+  const cancel=()=>{added.forEach(id=>idb.del(id));D.close()};
+  F.querySelector("#fcancel").onclick=cancel;
+  D.oncancel=e=>{e.preventDefault();cancel()};
+  const del=F.querySelector("#fdel");
+  if(del)del.onclick=()=>{if(!confirm("¿Eliminar este registro?"))return;[...(rec.files||[]).map(f=>f.id),...added].forEach(id=>idb.del(id));o.onDelete();D.close()};
+  F.onsubmit=async e=>{e.preventDefault();
+    const data=Object.fromEntries(new FormData(F));
+    if(o.files){data.files=files;removed.forEach(id=>idb.del(id))}
+    const ph=F.querySelector("#photoIn");
+    if(ph&&ph.files[0])data.photo=await toDataURL(await compress(ph.files[0],320));
+    o.onSave(data);D.close()};
+  D.showModal();
+}
+
+/* ============ TIPOS DE REGISTRO ============ */
+const TYPES={
+  vaccines:{title:"Vacunas y antiparasitarios",one:"vacuna o antiparasitario",sort:"date",fields:[
+    {k:"kind",label:"Tipo",type:"select",opts:["Vacuna","Antiparasitario interno","Antiparasitario externo"]},
+    {k:"name",label:"Nombre",ph:"Óctuple, antirrábica, pipeta…",req:1},
+    {k:"date",label:"Fecha aplicada",type:"date",req:1,def:()=>today()},
+    {k:"next",label:"Próxima dosis",type:"date"},
+    {k:"notes",label:"Notas",type:"textarea",ph:"Marca, lote, clínica…"}]},
+  visits:{title:"Visitas y atenciones",one:"visita",sort:"date",files:1,fields:[
+    {k:"date",label:"Fecha",type:"date",req:1,def:()=>today()},
+    {k:"pro",label:"Profesional",type:"select",opts:["Veterinario","Urgencia","Especialista (dermatólogo, cardiólogo…)","Fisiatra / kinesiólogo","Etólogo / adiestrador","Dentista","Nutricionista","Peluquería canina","Otro"]},
+    {k:"clinic",label:"Clínica / nombre del profesional",full:1,ph:"Clínica Los Aromos · Dra. Rojas"},
+    {k:"reason",label:"Motivo de la consulta",req:1,full:1,ph:"Control anual, vómitos, cojera…"},
+    {k:"diagnosis",label:"Diagnóstico",full:1},
+    {k:"cost",label:"Costo de la consulta ($)",type:"number"},
+    {k:"notes",label:"Indicaciones y notas",type:"textarea",ph:"Tratamiento, exámenes pedidos, próximo control…"}]},
+  conditions:{title:"Diagnósticos y enfermedades crónicas",one:"diagnóstico",sort:"since",fields:[
+    {k:"name",label:"Diagnóstico o enfermedad",req:1,full:1,ph:"Diabetes, artrosis, epilepsia, alergia alimentaria…"},
+    {k:"status",label:"Estado",type:"select",opts:["En tratamiento","Controlada","Resuelta"]},
+    {k:"since",label:"Diagnosticada el",type:"date"},
+    {k:"pro",label:"Profesional que la trata",full:1,ph:"Dra. Rojas · Clínica Los Aromos"},
+    {k:"notes",label:"Cuidados e indicaciones",type:"textarea",ph:"Qué hacer, qué evitar, señales de alerta…"}]},
+  meds:{title:"Remedios y recetas",one:"remedio",sort:"start",files:1,fields:[
+    {k:"name",label:"Remedio",req:1,ph:"Antibiótico, gotas para oídos…"},
+    {k:"dose",label:"Dosis",ph:"1/2 comprimido, 3 gotas…"},
+    {k:"freq",label:"Frecuencia",ph:"Cada 12 horas"},
+    {k:"times",label:"Horarios (para recordatorios)",ph:"09:00, 21:00"},
+    {k:"start",label:"Desde",type:"date",req:1,def:()=>today()},
+    {k:"end",label:"Hasta",type:"date"},
+    {k:"notes",label:"Notas",type:"textarea",ph:"Dar con comida, guardar refrigerado…"}]},
+  weights:{title:"Peso",one:"peso",sort:"date",fields:[
+    {k:"date",label:"Fecha",type:"date",req:1,def:()=>today()},
+    {k:"kg",label:"Peso (kg)",type:"number",req:1}]}
+};
+const PET_FIELDS=[
+  {k:"name",label:"Nombre",req:1},{k:"species",label:"Especie",type:"select",opts:Object.keys(EMOJI)},
+  {k:"breed",label:"Raza"},{k:"sex",label:"Sexo",type:"select",opts:["","Hembra","Macho"]},
+  {k:"birth",label:"Fecha de nacimiento (aprox.)",type:"date"},{k:"chip",label:"N° de microchip"},
+  {k:"allergies",label:"Alergias o condiciones importantes",full:1,ph:"Alergia al pollo, epilepsia…"},
+  {k:"vet",label:"Veterinario / clínica de cabecera"},{k:"vetPhone",label:"Teléfono del veterinario",type:"tel"},
+  {k:"owner",label:"Tu nombre (contacto de emergencia)"},{k:"ownerPhone",label:"Tu teléfono",type:"tel"},
+  {k:"careNotes",label:"Carácter y cuidados (para quien la cuide)",type:"textarea",ph:"Miedos, paseos, dónde duerme, qué no puede hacer…"},
+  {k:"photo",label:"Foto",type:"photo"}];
+function resolveDefs(fields){return fields.map(f=>typeof f.def==="function"?{...f,def:f.def()}:f)}
+function editRec(key,rec){
+  const T=TYPES[key],p=pet();
+  openForm({title:(rec?"Editar ":"Agregar ")+T.one,fields:resolveDefs(T.fields),rec,files:T.files,
+    onSave:d=>{if(rec)Object.assign(rec,d);else p[key].push({id:uid(),...d});save();render()},
+    onDelete:()=>{p[key]=p[key].filter(x=>x!==rec);save();render()}});
+}
+function editPet(p){
+  openForm({title:p?"Editar mascota":"Nueva mascota",fields:PET_FIELDS,rec:p,
+    onSave:d=>{if(p)Object.assign(p,d);else{const n=newPet(d);S.pets.push(n);S.current=n.id;view="resumen"}save();render()},
+    onDelete:async()=>{for(const k of["visits","meds"])for(const r of p[k])for(const f of r.files||[])idb.del(f.id);
+      S.pets=S.pets.filter(x=>x!==p);S.current=S.pets[0]?S.pets[0].id:null;save();render()}});
+}
+
+/* ============ CALENDARIO (.ics) ============ */
+function ics(events,name){
+  const st=new Date().toISOString().replace(/[-:]/g,"").slice(0,15)+"Z",cl=s=>String(s).replace(/([,;\\])/g,"\\$1");
+  const L=["BEGIN:VCALENDAR","VERSION:2.0","PRODID:-//MiPeludo//ES","CALSCALE:GREGORIAN"];
+  events.forEach(e=>{const d=e.date.replace(/-/g,"");L.push("BEGIN:VEVENT","UID:"+uid()+uid()+"@mipeludo","DTSTAMP:"+st);
+    if(e.time)L.push("DTSTART:"+d+"T"+e.time.replace(":","")+"00","DURATION:PT15M");else L.push("DTSTART;VALUE=DATE:"+d);
+    if(e.daily)L.push("RRULE:FREQ=DAILY"+(e.until?";UNTIL="+e.until.replace(/-/g,"")+"T235959":""));
+    L.push("SUMMARY:"+cl(e.title),"BEGIN:VALARM","ACTION:DISPLAY","DESCRIPTION:"+cl(e.title),"TRIGGER:"+(e.time?"PT0M":"-PT15H"),"END:VALARM","END:VEVENT")});
+  L.push("END:VCALENDAR");download(L.join("\r\n"),"text/calendar",name+".ics");
+}
+
+/* ============ VISTAS ============ */
+const TABS=[["resumen","Resumen"],["vaccines","Vacunas"],["visits","Visitas"],["conditions","Diagnósticos"],["meds","Remedios"],["comida","Comida"],["weights","Peso"]];
+function nextBadge(d){const n=daysTo(d);return n<0?`<span class="badge bad">Atrasada ${-n} día${n===-1?"":"s"}</span>`:n<=30?`<span class="badge warn">${n===0?"Hoy":"En "+n+" día"+(n===1?"":"s")}</span>`:`<span class="badge">${fmt(d)}</span>`}
+// una dosis "pendiente" deja de mostrarse cuando ya hay un registro posterior con el mismo nombre
+function pending(p){return p.vaccines.filter(v=>v.next&&!p.vaccines.some(o=>o!==v&&o.name.trim().toLowerCase()===v.name.trim().toLowerCase()&&o.date>v.date)).sort((a,b)=>a.next.localeCompare(b.next))}
+const activeConds=p=>p.conditions.filter(c=>c.status!=="Resuelta");
+const condBadge=c=>`<span class="badge ${c.status==="En tratamiento"?"warn":c.status==="Controlada"?"ok":""}">${esc(c.status||"")}</span>`;
+const lastWeight=p=>[...p.weights].sort((a,b)=>b.date.localeCompare(a.date))[0];
+const activeMeds=p=>p.meds.filter(m=>m.start<=today()&&(!m.end||m.end>=today()));
+const filesHTML=r=>(r.files&&r.files.length)?`<div class="files">${r.files.map(f=>`<span class="file" data-file="${f.id}"><span>${f.type==="application/pdf"?"📄":"🖼️"} ${esc(f.name)}</span></span>`).join("")}</div>`:"";
+
+function render(){
+  const p=pet();
+  $("pets").innerHTML=S.pets.map(x=>`<button class="chip" aria-pressed="${x.id===S.current}" data-id="${x.id}">${EMOJI[x.species]||"🐾"} ${esc(x.name)}</button>`).join("")+`<button class="chip" id="addPet">+ Agregar mascota</button>`;
+  $("pets").querySelectorAll("[data-id]").forEach(b=>b.onclick=()=>{S.current=b.dataset.id;save();render()});
+  $("addPet").onclick=()=>editPet(null);
+  $("tabs").innerHTML=p?TABS.map(([k,l])=>`<button class="tab" role="tab" aria-selected="${k===view}" data-v="${k}">${l}</button>`).join(""):"";
+  $("tabs").querySelectorAll(".tab").forEach(t=>t.onclick=()=>{view=t.dataset.v;render()});
+  const M=$("main");
+  if(!p){M.innerHTML=`<div class="card empty">Aún no tienes mascotas registradas.<br><br><button class="btn" id="first">Agregar mi primera mascota</button></div>`;$("first").onclick=()=>editPet(null);return}
+  ({resumen:vResumen,comida:vComida}[view]||vList)(p,M);
+  M.querySelectorAll("[data-file]").forEach(el=>el.onclick=e=>{e.stopPropagation();
+    const f=[...p.visits,...p.meds].flatMap(r=>r.files||[]).find(f=>f.id===el.dataset.file);if(f)viewFile(f)});
+}
+
+function vResumen(p,M){
+  const pend=pending(p),meds=activeMeds(p),times=parseTimes(p.feeding.times),w=[...p.weights].sort((a,b)=>b.date.localeCompare(a.date))[0];
+  M.innerHTML=`
+  <div class="card">
+    <div class="petcard">
+      ${p.photo?`<img class="avatar" src="${p.photo}" alt="">`:`<div class="avatar">${EMOJI[p.species]||"🐾"}</div>`}
+      <div><h2 style="margin:0;font-size:1.25rem">${esc(p.name)}</h2>
+        <div class="muted">${[p.species,p.breed,p.sex,age(p.birth)].filter(Boolean).map(esc).join(" · ")}</div>
+        ${p.chip?`<div class="muted">Microchip: ${esc(p.chip)}</div>`:""}${w?`<div class="muted">Último peso: ${esc(w.kg)} kg (${fmt(w.date)})</div>`:""}</div>
+    </div>
+    ${p.allergies?`<div class="alert">⚠️ ${esc(p.allergies)}</div>`:""}
+    ${p.vet||p.vetPhone?`<p style="margin:10px 0 0">🩺 ${esc(p.vet)} ${p.vetPhone?`· <a href="tel:${esc(p.vetPhone.replace(/\s/g,""))}" style="color:var(--brand)">${esc(p.vetPhone)}</a>`:""}</p>`:""}
+    <div class="actions"><button class="btn ghost sm" id="edit">✏️ Editar ficha</button></div>
+  </div>
+  <div class="card"><h2>Compartir la ficha de ${esc(p.name)}</h2>
+    <p class="muted" style="margin-top:0">Imprímela o guárdala como PDF para enviarla.</p>
+    <div class="actions" style="margin-top:0"><button class="btn sm" id="printVet">🩺 Ficha clínica (veterinario)</button><button class="btn sm" id="printCare">🏨 Ficha para cuidador u hotel</button><button class="btn ghost sm" id="share">💬 Enviar resumen por WhatsApp</button></div>
+  </div>
+  ${activeConds(p).length?`<div class="card"><h2>Diagnósticos y enfermedades crónicas</h2>${activeConds(p).map(c=>`<div class="item" style="cursor:default"><div class="top"><div><b>${esc(c.name)}</b>${c.notes?`<div class="muted">${esc(c.notes)}</div>`:""}</div>${condBadge(c)}</div></div>`).join("")}</div>`:""}
+  <div class="card"><h2>Próximas vacunas y antiparasitarios</h2>
+    ${pend.length?pend.map(v=>`<div class="item" style="cursor:default"><div class="top"><div><b>${esc(v.name)}</b><div class="muted">${esc(v.kind)} · le toca el ${fmt(v.next)}</div></div>${nextBadge(v.next)}</div></div>`).join(""):`<div class="empty">Nada pendiente 🎉</div>`}
+  </div>
+  <div class="card"><h2>Hoy</h2>
+    ${times.length?`<p style="margin:0 0 6px">🍽️ <b>Comida:</b> ${times.join(" · ")} ${p.feeding.amount?`<span class="muted">(${esc(p.feeding.amount)})</span>`:""}</p>`:`<p class="muted" style="margin:0 0 6px">Sin horarios de comida. Agrégalos en la pestaña Comida.</p>`}
+    ${meds.length?meds.map(m=>`<p style="margin:0 0 6px">💊 <b>${esc(m.name)}</b> ${esc(m.dose)} ${m.freq?"· "+esc(m.freq):""} ${m.end?`<span class="muted">(hasta el ${fmt(m.end)})</span>`:""}</p>`).join(""):`<p class="muted" style="margin:0">Sin remedios activos.</p>`}
+  </div>`;
+  $("edit").onclick=()=>editPet(p);$("printVet").onclick=()=>printReport(p,"clinica");$("printCare").onclick=()=>printReport(p,"cuidador");$("share").onclick=()=>shareSummary(p);
+}
+
+function vList(p,M){
+  const key=view,T=TYPES[key],list=[...p[key]].sort((a,b)=>(b[T.sort]||"").localeCompare(a[T.sort]||""));
+  const line={
+    vaccines:r=>`<div class="top"><div><b>${esc(r.name)}</b><div class="muted">${esc(r.kind)} · aplicada el ${fmt(r.date)}</div>${r.notes?`<div class="muted">${esc(r.notes)}</div>`:""}</div>${r.next?`<div style="text-align:right">${pending(p).includes(r)?nextBadge(r.next):`<span class="badge ok">Al día</span>`}<br><button class="btn ghost sm" data-ics="${r.id}" style="margin-top:6px">📅 Recordar</button></div>`:""}</div>`,
+    conditions:r=>`<div class="top"><div><b>${esc(r.name)}</b><div class="muted">${[r.since&&("Desde el "+fmt(r.since)),r.pro].filter(Boolean).map(esc).join(" · ")}</div>${r.notes?`<div class="muted">${esc(r.notes)}</div>`:""}</div>${condBadge(r)}</div>`,
+    visits:r=>`<div class="top"><div><b>${esc(r.reason)}</b><div class="muted">${[fmt(r.date),r.pro,r.clinic].filter(Boolean).map(esc).join(" · ")}</div></div>${r.cost?`<span class="badge">$${(+r.cost).toLocaleString("es-CL")}</span>`:""}</div>${r.diagnosis?`<div><b>Diagnóstico:</b> ${esc(r.diagnosis)}</div>`:""}${r.notes?`<div class="muted">${esc(r.notes)}</div>`:""}${filesHTML(r)}`,
+    meds:r=>{const act=activeMeds(p).includes(r),t=parseTimes(r.times);return `<div class="top"><div><b>${esc(r.name)}</b> ${esc(r.dose)}<div class="muted">${[r.freq,t.join(" · ")].filter(Boolean).map(esc).join(" · ")}</div><div class="muted">Desde el ${fmt(r.start)}${r.end?" hasta el "+fmt(r.end):""}</div>${r.notes?`<div class="muted">${esc(r.notes)}</div>`:""}</div><div style="text-align:right"><span class="badge ${act?"ok":""}">${act?"Activo":r.start>today()?"Por empezar":"Terminado"}</span>${act&&t.length?`<br><button class="btn ghost sm" data-ics="${r.id}" style="margin-top:6px">📅 Recordar</button>`:""}</div></div>${filesHTML(r)}`},
+    weights:r=>`<div class="top"><b>${esc(r.kg)} kg</b><span class="muted">${fmt(r.date)}</span></div>`
+  }[key];
+  M.innerHTML=(key==="weights"?`<div class="card"><h2>Evolución del peso</h2>${chart(p)}</div>`:"")+
+    `<div class="card"><div class="head"><h2>${T.title}</h2><button class="btn sm" id="add">+ Agregar</button></div>
+    ${list.length?list.map(r=>`<div class="item" data-rec="${r.id}">${line(r)}</div>`).join(""):`<div class="empty">Todavía no hay registros.</div>`}</div>`+
+    (key==="visits"&&list.some(r=>r.cost)?`<p class="muted" style="text-align:center">Gasto total en atenciones: <b>$${list.reduce((s,r)=>s+(+r.cost||0),0).toLocaleString("es-CL")}</b></p>`:"");
+  $("add").onclick=()=>editRec(key,null);
+  M.querySelectorAll("[data-rec]").forEach(el=>el.onclick=()=>editRec(key,p[key].find(r=>r.id===el.dataset.rec)));
+  M.querySelectorAll("[data-ics]").forEach(b=>b.onclick=e=>{e.stopPropagation();const r=p[key].find(x=>x.id===b.dataset.ics);
+    if(key==="vaccines")ics([{title:`${p.name}: ${r.name} (${r.kind.toLowerCase()})`,date:r.next>today()?r.next:addDays(1)}],`${p.name}-${r.name}`);
+    else ics(parseTimes(r.times).map(t=>({title:`${p.name}: ${r.name} ${r.dose||""}`.trim(),date:r.start>today()?r.start:today(),time:t,daily:1,until:r.end||addDays(30)})),`${p.name}-${r.name}`)});
+}
+
+function chart(p){
+  const w=[...p.weights].filter(x=>x.date&&+x.kg>0).sort((a,b)=>a.date.localeCompare(b.date));
+  if(w.length<2)return `<p class="muted">Registra al menos 2 pesos para ver el gráfico.</p>`;
+  const xs=w.map(x=>Date.parse(x.date)),ys=w.map(x=>+x.kg),x0=xs[0],x1=xs.at(-1)||x0+1,lo=Math.min(...ys),hi=Math.max(...ys),pad=(hi-lo||1)*.25;
+  const X=x=>30+(x-x0)/(x1-x0||1)*260,Y=y=>100-(y-(lo-pad))/((hi+pad)-(lo-pad))*85;
+  const pts=w.map((r,i)=>[X(xs[i]),Y(ys[i])]);
+  return `<svg viewBox="0 0 300 125" role="img" aria-label="Gráfico de peso" style="width:100%;height:auto">
+    <line x1="30" y1="100" x2="290" y2="100" stroke="var(--line)"/>
+    <polyline fill="none" stroke="var(--brand)" stroke-width="2" stroke-linejoin="round" points="${pts.map(q=>q.map(n=>n.toFixed(1)).join(",")).join(" ")}"/>
+    ${pts.map((q,i)=>`<circle cx="${q[0].toFixed(1)}" cy="${q[1].toFixed(1)}" r="3.5" fill="var(--brand)"><title>${fmt(w[i].date)}: ${w[i].kg} kg</title></circle>`).join("")}
+    <text x="${pts[0][0]}" y="${pts[0][1]-8}" text-anchor="start">${w[0].kg} kg</text><text x="${pts.at(-1)[0]}" y="${pts.at(-1)[1]-8}" text-anchor="end">${w.at(-1).kg} kg</text>
+    <text x="30" y="116">${fmt(w[0].date)}</text><text x="290" y="116" text-anchor="end">${fmt(w.at(-1).date)}</text></svg>`;
+}
+
+function vComida(p,M){
+  const f=p.feeding,t=parseTimes(f.times);
+  M.innerHTML=`<div class="card"><h2>Alimentación de ${esc(p.name)}</h2>
+    <form id="feed" class="row">
+      <label class="full">Alimento<input name="food" value="${esc(f.food)}" placeholder="Marca y tipo de alimento"></label>
+      <label>Porción<input name="amount" value="${esc(f.amount)}" placeholder="120 g, 1 taza…"></label>
+      <label>Horarios<input name="times" value="${esc(f.times)}" placeholder="08:00, 20:00"></label>
+      <label class="full">Notas<textarea name="notes" rows="2" placeholder="Alimentos prohibidos, premios, agua…">${esc(f.notes)}</textarea></label>
+    </form>
+    <p class="muted" id="saved" style="min-height:1.3em;margin:8px 0 0"></p>
+    ${t.length?`<p style="margin:6px 0">🍽️ Come ${t.length} ${t.length===1?"vez":"veces"} al día: <b>${t.join(" · ")}</b></p>`:""}
+    <div class="actions"><button class="btn" id="feedIcs" ${t.length?"":"disabled"}>📅 Agregar recordatorios a mi calendario</button></div>
+    <p class="muted">Se descarga un archivo de calendario: ábrelo y tu teléfono te avisará todos los días a esas horas.</p></div>`;
+  $("feed").oninput=e=>{Object.assign(p.feeding,Object.fromEntries(new FormData($("feed"))));save();$("saved").textContent="Guardado ✔"};
+  $("feed").onchange=()=>render();
+  $("feedIcs").onclick=()=>ics(t.map(x=>({title:`Comida de ${p.name}${f.amount?" ("+f.amount+")":""}`,date:today(),time:x,daily:1})),`comida-${p.name}`);
+}
+
+function printReport(p,mode){
+  const tbl=(head,rows)=>rows.length?`<table><tr>${head.map(h=>`<th>${h}</th>`).join("")}</tr>${rows.map(r=>`<tr>${r.map(c=>`<td${/^\d\d-\d\d-\d{4}$/.test(c)?' style="white-space:nowrap"':""}>${esc(c)}</td>`).join("")}</tr>`).join("")}</table>`:`<p>Sin registros.</p>`;
+  const by=(a,k)=>[...a].sort((x,y)=>(y[k]||"").localeCompare(x[k]||""));
+  const w=lastWeight(p),f=p.feeding,times=parseTimes(f.times),care=mode==="cuidador";
+  const head=`<div class="phead">${p.photo?`<img src="${p.photo}" alt="">`:""}<div><h1>${care?"Ficha de cuidados":"Ficha clínica"} · ${esc(p.name)}</h1>
+    <p>${[p.species,p.breed,p.sex,age(p.birth)&&("Edad: "+age(p.birth)),p.birth&&("Nac.: "+fmt(p.birth)),w&&("Peso: "+w.kg+" kg"),p.chip&&("Microchip: "+p.chip)].filter(Boolean).map(esc).join(" · ")}</p></div></div>
+    <table><tr><th>Tutor/a</th><td>${esc([p.owner,p.ownerPhone].filter(Boolean).join(" · ")||"—")}</td></tr><tr><th>Veterinario de cabecera</th><td>${esc([p.vet,p.vetPhone].filter(Boolean).join(" · ")||"—")}</td></tr></table>
+    ${p.allergies?`<p class="palert"><b>⚠ Alergias / condiciones importantes:</b> ${esc(p.allergies)}</p>`:""}`;
+  const conds=care?activeConds(p):by(p.conditions,"since");
+  const condsT=tbl(care?["Diagnóstico","Estado","Cuidados e indicaciones"]:["Diagnóstico","Estado","Desde","Profesional","Indicaciones"],conds.map(c=>care?[c.name,c.status,c.notes]:[c.name,c.status,fmt(c.since),c.pro,c.notes]));
+  const feed=`<table><tr><th>Alimento</th><td>${esc(f.food||"—")}</td></tr><tr><th>Porción</th><td>${esc(f.amount||"—")}</td></tr><tr><th>Horarios</th><td>${esc(times.join(" · ")||"—")}</td></tr>${f.notes?`<tr><th>Notas</th><td>${esc(f.notes)}</td></tr>`:""}</table>`;
+  const vacs=by(p.vaccines,"date");
+  let body;
+  if(care){
+    const latest=vacs.filter((v,i)=>vacs.findIndex(o=>o.name.trim().toLowerCase()===v.name.trim().toLowerCase())===i);
+    body=`<h2>Enfermedades y diagnósticos</h2>${condsT}
+      <h2>Medicamentos que toma actualmente</h2>${tbl(["Remedio","Dosis","Frecuencia","Horarios","Hasta","Notas"],activeMeds(p).map(m=>[m.name,m.dose,m.freq,parseTimes(m.times).join(" · "),fmt(m.end)||"Indefinido",m.notes]))}
+      <h2>Alimentación</h2>${feed}
+      <h2>Carácter y cuidados</h2><p>${esc(p.careNotes||"—")}</p>
+      <h2>Vacunas y antiparasitarios (última dosis)</h2>${tbl(["Nombre","Tipo","Aplicada","Próxima dosis"],latest.map(v=>[v.name,v.kind,fmt(v.date),fmt(v.next)]))}
+      <h2>En caso de emergencia</h2><p>1) Llamar a ${esc(p.owner||"la tutora o tutor")} ${esc(p.ownerPhone)} · 2) Veterinario: ${esc([p.vet,p.vetPhone].filter(Boolean).join(" · ")||"—")}</p>`;
+  }else{
+    body=`<h2>Diagnósticos y enfermedades crónicas</h2>${condsT}
+      <h2>Remedios</h2>${tbl(["Remedio","Dosis","Frecuencia","Desde","Hasta","Notas"],by(p.meds,"start").map(m=>[m.name,m.dose,m.freq,fmt(m.start),fmt(m.end),m.notes]))}
+      <h2>Visitas y atenciones</h2>${tbl(["Fecha","Profesional","Motivo","Diagnóstico","Indicaciones","Adjuntos"],by(p.visits,"date").map(v=>[fmt(v.date),[v.pro,v.clinic].filter(Boolean).join(" · "),v.reason,v.diagnosis,v.notes,(v.files||[]).length||""]))}
+      <h2>Vacunas y antiparasitarios</h2>${tbl(["Fecha","Tipo","Nombre","Próxima dosis","Notas"],vacs.map(v=>[fmt(v.date),v.kind,v.name,fmt(v.next),v.notes]))}
+      <h2>Alimentación</h2>${feed}
+      <h2>Peso</h2>${tbl(["Fecha","Peso"],by(p.weights,"date").map(x=>[fmt(x.date),x.kg+" kg"]))}`;
+  }
+  $("printArea").innerHTML=head+body+`<p style="margin-top:18px;font-size:.8rem">Información registrada por la tutora o tutor en MiPeludo · ${fmt(today())}</p>`;
+  window.print();
+}
+function shareSummary(p){
+  const f=p.feeding,t=parseTimes(f.times),L=[`🐾 *${p.name}* — ficha de cuidados`,[p.species,p.breed,age(p.birth)].filter(Boolean).join(" · ")];
+  if(p.allergies)L.push("",`⚠️ *Alergias:* ${p.allergies}`);
+  if(activeConds(p).length)L.push("","*Enfermedades / diagnósticos:*",...activeConds(p).map(c=>`• ${c.name} (${c.status})${c.notes?": "+c.notes:""}`));
+  if(activeMeds(p).length)L.push("","💊 *Medicamentos:*",...activeMeds(p).map(m=>`• ${[m.name,m.dose,m.freq,parseTimes(m.times).join(" y ")].filter(Boolean).join(" · ")}${m.end?" (hasta el "+fmt(m.end)+")":""}${m.notes?". "+m.notes:""}`));
+  if(f.food||t.length)L.push("","🍽️ *Alimentación:* "+[f.food,f.amount,t.join(" y "),f.notes].filter(Boolean).join(" · "));
+  if(p.careNotes)L.push("","🐶 *Cuidados:* "+p.careNotes);
+  L.push("","📞 *Emergencias:* "+[[p.owner,p.ownerPhone].filter(Boolean).join(" "),[p.vet,p.vetPhone].filter(Boolean).join(" ")].filter(Boolean).join(" · "));
+  const text=L.join("\n");
+  if(navigator.share)navigator.share({text}).catch(()=>{});else window.open("https://wa.me/?text="+encodeURIComponent(text),"_blank","noopener");
+}
+
+/* ============ AJUSTES / COPIA DE SEGURIDAD ============ */
+function openSettings(){
+  const D=$("dlg"),F=$("dlgForm");
+  F.innerHTML=`<h2>Copia de seguridad</h2>
+    <p class="muted">Tus datos y documentos se guardan <b>solo en este dispositivo</b>. Descarga una copia cada cierto tiempo, o para pasar todo a otro teléfono o computador.</p>
+    <div class="actions"><button type="button" class="btn" id="exp">Descargar copia</button>
+      <label class="btn ghost">Restaurar copia<input type="file" id="imp" accept="application/json,.json" hidden></label></div>
+    <p class="muted" id="bmsg" style="min-height:1.3em"></p>
+    <div class="actions"><button type="button" class="btn danger" id="wipe">Borrar todo</button><button type="button" class="btn ghost" id="sclose">Cerrar</button></div>`;
+  F.onsubmit=e=>e.preventDefault();D.oncancel=null;
+  $("sclose").onclick=()=>D.close();
+  $("exp").onclick=async()=>{$("bmsg").textContent="Preparando copia…";const files={};
+    for(const p of S.pets)for(const k of["visits","meds"])for(const r of p[k])for(const f of r.files||[]){const b=await idb.get(f.id);if(b)files[f.id]=await toDataURL(b)}
+    download(JSON.stringify({app:"mipeludo",version:1,state:S,files}),"application/json",`mipeludo-copia-${today()}.json`);$("bmsg").textContent="Copia descargada ✔"};
+  $("imp").onchange=async e=>{const f=e.target.files[0];if(!f)return;
+    try{const d=JSON.parse(await f.text());if(d.app!=="mipeludo"||!d.state||!Array.isArray(d.state.pets))throw 0;
+      if(!confirm("Esto reemplaza los datos actuales de este dispositivo por los de la copia. ¿Continuar?"))return;
+      await idb.clear();for(const [id,u] of Object.entries(d.files||{}))await idb.put(id,await fromDataURL(u));
+      S=d.state;save();D.close();view="resumen";render();alert("Copia restaurada ✔")}catch(_){alert("Ese archivo no es una copia válida de MiPeludo.")}};
+  $("wipe").onclick=async()=>{if(!confirm("Esto borra todas las mascotas y documentos de este dispositivo. ¿Seguro?"))return;
+    await idb.clear();S={current:null,pets:[]};save();D.close();render()};
+  D.showModal();
+}
+
+function init(){load();$("settingsBtn").onclick=openSettings;render()}
+</script>
+</body>
+</html>

@@ -1,0 +1,113 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>MiPeludo · Toda la salud de tu mascota en un solo lugar</title>
+<meta name="description" content="Vacunas, visitas al veterinario, recetas, exámenes, remedios, comida y peso de tu perro o gato, ordenados en tu celular.">
+<style>
+:root{--bg:#f5f8f7;--card:#fff;--ink:#16211f;--muted:#5d6b68;--line:#dfe7e5;--brand:#0d9488;--brand-ink:#fff}
+@media (prefers-color-scheme: dark){:root{--bg:#0f1514;--card:#182120;--ink:#eef4f3;--muted:#9aaaa6;--line:#2a3735;--brand:#2dd4bf;--brand-ink:#04211e}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:17px/1.55 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+.wrap{max-width:760px;margin:0 auto;padding:0 16px}
+section{padding:48px 0;border-bottom:1px solid var(--line)}
+h1{font-size:clamp(1.9rem,6vw,2.8rem);line-height:1.1;margin:.3em 0}
+h2{font-size:1.6rem;line-height:1.2;margin:0 0 .6em}
+.pill{display:inline-block;background:var(--card);border:1px solid var(--line);border-radius:999px;padding:4px 12px;font-size:.85rem;color:var(--muted)}
+.lead{font-size:1.15rem;color:var(--muted)}
+.cta{display:block;text-align:center;background:var(--brand);color:var(--brand-ink);text-decoration:none;font-weight:700;padding:16px 20px;border-radius:14px;font-size:1.1rem;margin:20px 0 8px}
+.cta.alt{background:transparent;color:var(--ink);border:2px solid var(--line)}
+.small{font-size:.85rem;color:var(--muted);text-align:center}
+.grid{display:grid;gap:12px;grid-template-columns:repeat(auto-fit,minmax(200px,1fr))}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:18px}
+.card b{display:block;margin-bottom:4px}
+.shot{background:var(--card);border:1px solid var(--line);border-radius:20px;padding:18px;margin-top:24px;box-shadow:0 10px 40px rgba(0,0,0,.08)}
+.price-big{font-size:2.6rem;font-weight:800}
+.strike{text-decoration:line-through;color:var(--muted)}
+ul.check{list-style:none;padding:0}ul.check li{padding:6px 0 6px 28px;position:relative}ul.check li:before{content:"✓";position:absolute;left:0;color:var(--brand);font-weight:800}
+details{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px 16px;margin-bottom:8px}
+summary{cursor:pointer;font-weight:600}
+.bar{display:flex;justify-content:space-between;gap:12px;padding:6px 0;border-bottom:1px dashed var(--line)}
+.tag{border-radius:999px;padding:1px 10px;font-size:.8rem;font-weight:600;white-space:nowrap}
+footer{padding:32px 0;color:var(--muted);font-size:.85rem;text-align:center}
+</style>
+</head>
+<body>
+<div class="wrap">
+<section>
+  <span class="pill">🐾 Para quienes su mascota es parte de la familia</span>
+  <h1>"¿Cuándo fue su última vacuna?" Nunca más te quedes en blanco.</h1>
+  <p class="lead">MiPeludo guarda toda la salud de tu perro o gato en tu celular: vacunas, visitas al veterinario, recetas, exámenes, remedios, comida y peso. Todo ordenado y a mano cuando el veterinario pregunta.</p>
+  <a class="cta" href="#precio">Quiero ordenar la salud de mi mascota →</a>
+  <p class="small">Funciona en el celular y en el computador · Sin descargar nada · Acceso inmediato por email</p>
+  <div class="shot" aria-label="Vista de la app">
+    <b>🐶 Luna · Mestiza · 3 años</b>
+    <div class="bar"><span>Antiparasitario</span><span class="tag" style="background:#fee2e2;color:#b91c1c">Atrasado 5 días</span></div>
+    <div class="bar"><span>Vacuna óctuple</span><span class="tag" style="background:#fef3c7;color:#b45309">En 15 días</span></div>
+    <div class="bar"><span>🍽️ Comida</span><span>08:00 · 20:00</span></div>
+    <div class="bar"><span>💊 Antihistamínico</span><span>cada 12 horas</span></div>
+    <div class="bar"><span>📄 Examen de sangre.pdf</span><span>guardado</span></div>
+  </div>
+</section>
+
+<section>
+  <h2>¿Te pasa esto?</h2>
+  <div class="grid">
+    <div class="card"><b>📒 El carnet de vacunas perdido</b>O guardado en algún cajón, justo cuando lo necesitas.</div>
+    <div class="card"><b>🗂️ Exámenes repartidos</b>Unos en el WhatsApp, otros en el correo, otros en papel.</div>
+    <div class="card"><b>💊 "¿Ya le diste el remedio?"</b>Nadie en la casa está seguro.</div>
+  </div>
+</section>
+
+<section>
+  <h2>Todo en una sola ficha</h2>
+  <div class="grid">
+    <div class="card"><b>💉 Vacunas y antiparasitarios</b>Con la próxima fecha y aviso de "le toca pronto" o "atrasada".</div>
+    <div class="card"><b>🩺 Veterinario y otros profesionales</b>Fisiatra, especialistas, etólogo, peluquería: motivo, diagnóstico, indicaciones y cuánto gastaste.</div>
+    <div class="card"><b>📋 Enfermedades crónicas</b>Cada diagnóstico con su estado y los cuidados que necesita.</div>
+    <div class="card"><b>📎 Recetas y exámenes</b>Sácales una foto o adjunta el PDF y quedan guardados en la visita.</div>
+    <div class="card"><b>💊 Remedios</b>Dosis, horarios y hasta cuándo. Con recordatorio en tu calendario.</div>
+    <div class="card"><b>🍽️ Comida</b>Alimento, porción y horarios, con recordatorio diario.</div>
+    <div class="card"><b>⚖️ Peso</b>Registro y gráfico para ver cómo evoluciona.</div>
+    <div class="card"><b>🖨️ Ficha clínica para el veterinario</b>Todo el historial en un PDF, en un toque.</div>
+    <div class="card"><b>🏨 Ficha para hotel canino o cuidador</b>Enfermedades, remedios, comida, alergias y teléfonos de emergencia. En PDF o por WhatsApp.</div>
+    <div class="card"><b>🐶🐱 Varias mascotas</b>Cada una con su propia ficha.</div>
+  </div>
+</section>
+
+<section id="precio">
+  <h2>Todo lo que te llevas</h2>
+  <ul class="check">
+    <li>Acceso de por vida a MiPeludo (celular y computador)</li>
+    <li>Mascotas, registros y documentos ilimitados</li>
+    <li>Recordatorios en el calendario de tu teléfono</li>
+    <li>Ficha clínica para el veterinario y ficha de cuidados para hotel canino o cuidador</li>
+    <li>Copia de seguridad para pasar todo a otro dispositivo</li>
+  </ul>
+  <div class="card" style="text-align:center">
+    <div class="strike">$19.990</div>
+    <div class="price-big">$9.990</div>
+    <div class="small">Pago único · sin mensualidad</div>
+    <!-- REEMPLAZAR estos dos href por tus links de pago reales -->
+    <a class="cta" href="https://REEMPLAZAR-LINK-PAGO-CHILE">Quiero MiPeludo (débito, crédito o transferencia)</a>
+    <a class="cta alt" href="https://REEMPLAZAR-LINK-PAGO-USD">Pagar desde otro país (USD 12)</a>
+    <p class="small">🔒 Pago seguro. El acceso te llega al instante al email que ingreses.</p>
+  </div>
+  <div class="card" style="margin-top:12px"><b>🛡️ Garantía de 7 días</b>Si no te sirve, te devolvemos el 100%. Escríbenos y listo.</div>
+</section>
+
+<section>
+  <h2>Preguntas frecuentes</h2>
+  <details><summary>¿Tengo que descargar algo?</summary><p>No. Es una web: la abres desde el link del email y, si quieres, la agregas a la pantalla de inicio del celular.</p></details>
+  <details><summary>¿Dónde se guardan los datos de mi mascota?</summary><p>En tu propio dispositivo: nadie más los ve. Por eso te recomendamos descargar una copia de seguridad cada cierto tiempo (es un botón).</p></details>
+  <details><summary>¿Cómo funcionan los recordatorios?</summary><p>Con un toque se agregan al calendario de tu teléfono, que es el que te avisa a la hora indicada.</p></details>
+  <details><summary>¿Sirve para gatos, conejos u otros animales?</summary><p>Sí, para cualquier mascota.</p></details>
+  <details><summary>¿Reemplaza al veterinario?</summary><p>No. MiPeludo ordena la información; las decisiones de salud siempre son con tu veterinario.</p></details>
+  <details><summary>¿Es pago mensual?</summary><p>No, pagas una sola vez.</p></details>
+</section>
+
+<footer>© MiPeludo · <a href="mailto:REEMPLAZAR@tuemail.com" style="color:inherit">Contacto</a> · Términos y licencia de uso personal</footer>
+</div>
+</body>
+</html>
