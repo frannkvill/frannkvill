@@ -1,0 +1,329 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex">
+<meta name="theme-color" content="#7c3aed">
+<title>CostoDulce · Costeo de recetas</title>
+<style>
+:root{
+  --bg:#faf7f2; --card:#ffffff; --ink:#1f1a17; --muted:#6b625b; --line:#e8e1d8;
+  --brand:#7c3aed; --brand-ink:#ffffff; --ok:#15803d; --warn:#b45309; --bad:#b91c1c;
+  --radius:14px; --shadow:0 1px 2px rgba(0,0,0,.05),0 4px 16px rgba(0,0,0,.04);
+}
+@media (prefers-color-scheme: dark){
+  :root{--bg:#141110;--card:#1e1a18;--ink:#f3eee9;--muted:#a59b92;--line:#332c28;--brand:#a78bfa;--brand-ink:#1a1033}
+}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+button,input,select{font:inherit;color:inherit}
+.wrap{max-width:880px;margin:0 auto;padding:16px 16px 96px}
+header{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:12px}
+h1{font-size:1.35rem;margin:0}
+h2{font-size:1.05rem;margin:0 0 10px}
+.muted{color:var(--muted);font-size:.9rem}
+.card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:16px;margin-bottom:14px;box-shadow:var(--shadow)}
+.tabs{display:flex;gap:6px;margin-bottom:14px;overflow-x:auto}
+.tab{border:1px solid var(--line);background:var(--card);padding:8px 14px;border-radius:999px;cursor:pointer;white-space:nowrap}
+.tab[aria-selected=true]{background:var(--brand);color:var(--brand-ink);border-color:var(--brand)}
+.row{display:grid;gap:8px;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));align-items:end}
+label{display:flex;flex-direction:column;gap:4px;font-size:.85rem;color:var(--muted)}
+input,select{background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:9px 10px;min-width:0;width:100%}
+input:focus,select:focus{outline:2px solid var(--brand);outline-offset:1px}
+.btn{border:0;background:var(--brand);color:var(--brand-ink);padding:10px 16px;border-radius:10px;cursor:pointer;font-weight:600}
+.btn.ghost{background:transparent;color:var(--ink);border:1px solid var(--line)}
+.btn.sm{padding:6px 10px;font-size:.85rem}
+.btn.danger{background:transparent;color:var(--bad);border:1px solid var(--line)}
+table{width:100%;border-collapse:collapse;font-size:.92rem}
+th,td{text-align:left;padding:8px 6px;border-bottom:1px solid var(--line);vertical-align:middle}
+th{color:var(--muted);font-weight:500;font-size:.8rem}
+td.num,th.num{text-align:right;font-variant-numeric:tabular-nums}
+.list-item{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:12px 0;border-bottom:1px solid var(--line);cursor:pointer}
+.list-item:last-child{border-bottom:0}
+.big{font-size:2rem;font-weight:800;font-variant-numeric:tabular-nums}
+.kpis{display:grid;gap:10px;grid-template-columns:repeat(auto-fit,minmax(150px,1fr))}
+.kpi{background:var(--bg);border:1px solid var(--line);border-radius:12px;padding:12px}
+.kpi b{display:block;font-size:1.25rem;font-variant-numeric:tabular-nums}
+.highlight{background:var(--brand);color:var(--brand-ink);border-color:var(--brand)}
+.highlight .muted{color:inherit;opacity:.85}
+.empty{text-align:center;padding:24px;color:var(--muted)}
+.actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+.hidden{display:none!important}
+.table-scroll{overflow-x:auto}
+/* gate */
+#gate{position:fixed;inset:0;background:var(--bg);display:grid;place-items:center;padding:16px;z-index:10}
+#gate .card{max-width:380px;width:100%;text-align:center}
+#gate .err{color:var(--bad);min-height:1.2em;font-size:.9rem}
+@media print{.tabs,.actions,header .btn,#gate{display:none!important}.card{box-shadow:none}}
+</style>
+</head>
+<body>
+
+<!-- Pantalla de acceso: solo entra quien tiene el código que llega por email al comprar -->
+<div id="gate">
+  <div class="card">
+    <div style="font-size:2.4rem">🎂</div>
+    <h1>CostoDulce</h1>
+    <p class="muted">Ingresá el código de acceso que te llegó por email al comprar.</p>
+    <form id="gateForm">
+      <input id="gateCode" autocomplete="one-time-code" placeholder="Tu código" required>
+      <p class="err" id="gateErr"></p>
+      <button class="btn" style="width:100%">Entrar</button>
+    </form>
+  </div>
+</div>
+
+<div class="wrap" id="app" hidden>
+  <header>
+    <div>
+      <h1>🎂 CostoDulce</h1>
+      <div class="muted">Sabé cuánto te cuesta cada torta y a cuánto venderla.</div>
+    </div>
+    <select id="currency" aria-label="Moneda" style="width:auto">
+      <option value="$">$</option><option value="USD ">USD</option><option value="€">€</option><option value="S/ ">S/</option><option value="Bs ">Bs</option><option value="Q">Q</option>
+    </select>
+  </header>
+
+  <nav class="tabs" role="tablist">
+    <button class="tab" role="tab" data-view="recetas" aria-selected="true">Recetas</button>
+    <button class="tab" role="tab" data-view="ingredientes" aria-selected="false">Ingredientes</button>
+    <button class="tab" role="tab" data-view="ajustes" aria-selected="false">Ajustes</button>
+  </nav>
+
+  <!-- RECETAS -->
+  <section id="view-recetas">
+    <div id="recipeList" class="card"></div>
+    <div id="recipeEditor" class="hidden"></div>
+  </section>
+
+  <!-- INGREDIENTES -->
+  <section id="view-ingredientes" class="hidden">
+    <div class="card">
+      <h2>Agregar ingrediente</h2>
+      <p class="muted">Cargalo como lo comprás: ej. Harina, paquete de 1000 g a $1.200.</p>
+      <form id="ingForm" class="row">
+        <label>Nombre<input name="name" required placeholder="Harina 0000"></label>
+        <label>Precio del paquete<input name="price" type="number" step="any" min="0" required></label>
+        <label>Cantidad del paquete<input name="qty" type="number" step="any" min="0.0001" required></label>
+        <label>Unidad<select name="unit"><option value="g">gramos (g)</option><option value="ml">mililitros (ml)</option><option value="u">unidades</option></select></label>
+        <button class="btn">Agregar</button>
+      </form>
+    </div>
+    <div class="card"><h2>Mis ingredientes</h2><div id="ingList"></div></div>
+  </section>
+
+  <!-- AJUSTES -->
+  <section id="view-ajustes" class="hidden">
+    <div class="card">
+      <h2>Valores por defecto para recetas nuevas</h2>
+      <div class="row">
+        <label>Tu hora de trabajo vale<input id="defRate" type="number" step="any" min="0"></label>
+        <label>Ganancia deseada (%)<input id="defMargin" type="number" step="any" min="0"></label>
+        <label>Gastos fijos: gas, luz… (% sobre ingredientes)<input id="defOverhead" type="number" step="any" min="0"></label>
+      </div>
+    </div>
+    <div class="card">
+      <h2>Copia de seguridad</h2>
+      <p class="muted">Tus datos se guardan solo en este dispositivo. Descargá una copia para pasarlos a otro celular o computadora.</p>
+      <div class="actions">
+        <button class="btn" id="exportBtn">Descargar copia</button>
+        <label class="btn ghost" style="flex-direction:row;color:var(--ink)">Restaurar copia<input type="file" id="importFile" accept="application/json" hidden></label>
+        <button class="btn danger" id="resetBtn">Borrar todo</button>
+      </div>
+    </div>
+  </section>
+</div>
+
+<script>
+/* ============ CONFIG DEL VENDEDOR ============
+   ACCESS_HASHES: SHA-256 de los códigos válidos (en minúsculas).
+   Generar uno:  echo -n "TUCODIGO" | sha256sum
+   El hash de abajo corresponde al código de demo: DULCE2026  (cambialo antes de vender). */
+const ACCESS_HASHES = [
+  "f541fc2cb935d9e48ceeb0a14d24ad7a34dac48f8f8e1d8e3f926b71a5959660"
+];
+const STORE_KEY = "costodulce.v1";
+const ACCESS_KEY = "costodulce.access";
+
+/* ============ ACCESO ============ */
+async function sha256(t){
+  const buf = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(t));
+  return [...new Uint8Array(buf)].map(b=>b.toString(16).padStart(2,"0")).join("");
+}
+async function isValid(code){ return ACCESS_HASHES.includes(await sha256(code.trim().toUpperCase())); }
+function unlock(){ document.getElementById("gate").remove(); document.getElementById("app").hidden=false; init(); }
+(async()=>{
+  let saved=null; try{saved=localStorage.getItem(ACCESS_KEY)}catch(e){}
+  if(saved && await isValid(saved)) return unlock();
+  document.getElementById("gateForm").addEventListener("submit", async e=>{
+    e.preventDefault();
+    const code=document.getElementById("gateCode").value;
+    if(await isValid(code)){ try{localStorage.setItem(ACCESS_KEY,code.trim().toUpperCase())}catch(e){} unlock(); }
+    else document.getElementById("gateErr").textContent="Código incorrecto. Revisá el email de tu compra.";
+  });
+})();
+
+/* ============ DATOS ============ */
+const uid=()=>Math.random().toString(36).slice(2,10);
+const DEFAULT_STATE={
+  currency:"$",
+  defaults:{rate:3000,margin:40,overhead:10},
+  ingredients:[
+    {id:uid(),name:"Harina 0000",price:1200,qty:1000,unit:"g"},
+    {id:uid(),name:"Azúcar",price:1500,qty:1000,unit:"g"},
+    {id:uid(),name:"Manteca",price:2800,qty:200,unit:"g"},
+    {id:uid(),name:"Huevos",price:4200,qty:30,unit:"u"},
+    {id:uid(),name:"Leche",price:1400,qty:1000,unit:"ml"},
+    {id:uid(),name:"Dulce de leche",price:3500,qty:1000,unit:"g"}
+  ],
+  recipes:[]
+};
+let S;
+function load(){
+  try{ S=JSON.parse(localStorage.getItem(STORE_KEY)) }catch(e){}
+  if(!S){ S=structuredClone(DEFAULT_STATE); seedRecipe(); save(); }
+}
+function save(){ try{localStorage.setItem(STORE_KEY,JSON.stringify(S))}catch(e){} }
+function seedRecipe(){
+  const by=n=>S.ingredients.find(i=>i.name===n).id;
+  S.recipes.push({id:uid(),name:"Torta de ejemplo (borrala cuando quieras)",yield:12,hours:2,rate:S.defaults.rate,margin:S.defaults.margin,overhead:S.defaults.overhead,packaging:1500,
+    items:[{ing:by("Harina 0000"),qty:300},{ing:by("Azúcar"),qty:250},{ing:by("Manteca"),qty:200},{ing:by("Huevos"),qty:4},{ing:by("Leche"),qty:150},{ing:by("Dulce de leche"),qty:500}]});
+}
+
+/* ============ CÁLCULOS ============ */
+const unitCost=i=>i.qty>0?i.price/i.qty:0;
+function calc(r){
+  const ingCost=r.items.reduce((s,it)=>{const i=S.ingredients.find(x=>x.id===it.ing);return s+(i?unitCost(i)*(+it.qty||0):0)},0);
+  const overhead=ingCost*(+r.overhead||0)/100;
+  const labor=(+r.hours||0)*(+r.rate||0);
+  const packaging=+r.packaging||0;
+  const total=ingCost+overhead+labor+packaging;
+  const price=total*(1+(+r.margin||0)/100);
+  const y=Math.max(1,+r.yield||1);
+  return {ingCost,overhead,labor,packaging,total,price,perPortion:price/y,costPortion:total/y,profit:price-total};
+}
+const money=n=>S.currency+(Math.round(n)).toLocaleString("es-AR");
+const esc=s=>String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+
+/* ============ VISTAS ============ */
+let editing=null;
+function show(view){
+  document.querySelectorAll(".tab").forEach(t=>t.setAttribute("aria-selected",t.dataset.view===view));
+  ["recetas","ingredientes","ajustes"].forEach(v=>document.getElementById("view-"+v).classList.toggle("hidden",v!==view));
+  if(view==="recetas"){editing=null;renderRecipes()}
+  if(view==="ingredientes")renderIngredients();
+  if(view==="ajustes")renderSettings();
+}
+
+function renderRecipes(){
+  const list=document.getElementById("recipeList"), ed=document.getElementById("recipeEditor");
+  if(editing){list.classList.add("hidden");ed.classList.remove("hidden");return renderEditor()}
+  list.classList.remove("hidden");ed.classList.add("hidden");
+  list.innerHTML=`<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px"><h2 style="margin:0">Mis recetas</h2><button class="btn" id="newRecipe">+ Nueva receta</button></div>`+
+    (S.recipes.length?S.recipes.map(r=>{const c=calc(r);return `<div class="list-item" data-id="${r.id}"><div><b>${esc(r.name)}</b><div class="muted">${r.yield} porciones · costo ${money(c.total)}</div></div><div style="text-align:right"><b>${money(c.price)}</b><div class="muted">precio sugerido</div></div></div>`}).join("")
+    :`<div class="empty">Todavía no tenés recetas. Creá la primera 👆</div>`);
+  list.querySelector("#newRecipe").onclick=()=>{
+    const r={id:uid(),name:"Nueva receta",yield:1,hours:1,rate:S.defaults.rate,margin:S.defaults.margin,overhead:S.defaults.overhead,packaging:0,items:[]};
+    S.recipes.unshift(r);save();editing=r.id;renderRecipes();
+  };
+  list.querySelectorAll(".list-item").forEach(el=>el.onclick=()=>{editing=el.dataset.id;renderRecipes()});
+}
+
+function renderEditor(){
+  const r=S.recipes.find(x=>x.id===editing); if(!r){editing=null;return renderRecipes()}
+  const ed=document.getElementById("recipeEditor");
+  const opts=S.ingredients.map(i=>`<option value="${i.id}">${esc(i.name)} (${i.unit})</option>`).join("");
+  ed.innerHTML=`
+  <div class="card">
+    <div class="actions" style="margin:0 0 10px"><button class="btn ghost sm" id="back">← Volver</button></div>
+    <div class="row">
+      <label style="grid-column:1/-1">Nombre de la receta<input data-f="name" value="${esc(r.name)}"></label>
+      <label>Porciones / unidades que rinde<input data-f="yield" type="number" min="1" step="1" value="${r.yield}"></label>
+      <label>Horas de trabajo<input data-f="hours" type="number" min="0" step="any" value="${r.hours}"></label>
+      <label>Valor de tu hora<input data-f="rate" type="number" min="0" step="any" value="${r.rate}"></label>
+      <label>Packaging / caja<input data-f="packaging" type="number" min="0" step="any" value="${r.packaging}"></label>
+      <label>Gastos fijos (%)<input data-f="overhead" type="number" min="0" step="any" value="${r.overhead}"></label>
+      <label>Ganancia (%)<input data-f="margin" type="number" min="0" step="any" value="${r.margin}"></label>
+    </div>
+  </div>
+  <div class="card">
+    <h2>Ingredientes de esta receta</h2>
+    ${S.ingredients.length?`<form id="addItem" class="row" style="margin-bottom:10px">
+      <label>Ingrediente<select name="ing">${opts}</select></label>
+      <label>Cantidad que usás<input name="qty" type="number" step="any" min="0" required></label>
+      <button class="btn">Agregar</button></form>`:`<p class="muted">Primero cargá ingredientes en la pestaña Ingredientes.</p>`}
+    <div class="table-scroll"><table><thead><tr><th>Ingrediente</th><th class="num">Cantidad</th><th class="num">Costo</th><th></th></tr></thead><tbody id="items"></tbody></table></div>
+  </div>
+  <div class="card" id="result"></div>
+  <div class="actions">
+    <button class="btn ghost" id="dup">Duplicar</button>
+    <button class="btn ghost" onclick="print()">Imprimir</button>
+    <button class="btn danger" id="del">Eliminar receta</button>
+  </div>`;
+  ed.querySelector("#back").onclick=()=>{editing=null;renderRecipes()};
+  ed.querySelectorAll("[data-f]").forEach(inp=>inp.oninput=()=>{const f=inp.dataset.f;r[f]=f==="name"?inp.value:+inp.value;save();renderItems(r);renderResult(r)});
+  const add=ed.querySelector("#addItem");
+  if(add)add.onsubmit=e=>{e.preventDefault();const fd=new FormData(add);r.items.push({ing:fd.get("ing"),qty:+fd.get("qty")});save();add.reset();renderItems(r);renderResult(r)};
+  ed.querySelector("#dup").onclick=()=>{const c=structuredClone(r);c.id=uid();c.name+=" (copia)";S.recipes.unshift(c);save();editing=c.id;renderEditor()};
+  ed.querySelector("#del").onclick=()=>{if(confirm("¿Eliminar esta receta?")){S.recipes=S.recipes.filter(x=>x.id!==r.id);save();editing=null;renderRecipes()}};
+  renderItems(r);renderResult(r);
+}
+function renderItems(r){
+  const tb=document.getElementById("items");
+  tb.innerHTML=r.items.length?r.items.map((it,k)=>{const i=S.ingredients.find(x=>x.id===it.ing);if(!i)return `<tr><td colspan="3" class="muted">Ingrediente eliminado</td><td><button class="btn danger sm" data-rm="${k}">✕</button></td></tr>`;
+    return `<tr><td>${esc(i.name)}</td><td class="num" style="white-space:nowrap"><input data-q="${k}" type="number" step="any" min="0" value="${it.qty}" style="width:72px;text-align:right"> ${i.unit}</td><td class="num">${money(unitCost(i)*it.qty)}</td><td><button class="btn danger sm" data-rm="${k}" aria-label="Quitar">✕</button></td></tr>`}).join("")
+    :`<tr><td colspan="4" class="empty">Agregá los ingredientes que usa esta receta.</td></tr>`;
+  tb.querySelectorAll("[data-rm]").forEach(b=>b.onclick=()=>{r.items.splice(+b.dataset.rm,1);save();renderItems(r);renderResult(r)});
+  tb.querySelectorAll("[data-q]").forEach(inp=>inp.onchange=()=>{r.items[+inp.dataset.q].qty=+inp.value;save();renderItems(r);renderResult(r)});
+}
+function renderResult(r){
+  const c=calc(r);
+  document.getElementById("result").innerHTML=`
+    <h2>Resultado</h2>
+    <div class="kpis">
+      <div class="kpi highlight"><span class="muted">Precio de venta sugerido</span><b class="big">${money(c.price)}</b></div>
+      <div class="kpi"><span class="muted">Precio por porción</span><b>${money(c.perPortion)}</b></div>
+      <div class="kpi"><span class="muted">Te queda de ganancia</span><b style="color:var(--ok)">${money(c.profit)}</b></div>
+    </div>
+    <div class="table-scroll" style="margin-top:12px"><table>
+      <tr><td>Ingredientes</td><td class="num">${money(c.ingCost)}</td></tr>
+      <tr><td>Gastos fijos (${r.overhead}%)</td><td class="num">${money(c.overhead)}</td></tr>
+      <tr><td>Tu trabajo (${r.hours} h)</td><td class="num">${money(c.labor)}</td></tr>
+      <tr><td>Packaging</td><td class="num">${money(c.packaging)}</td></tr>
+      <tr><td><b>Costo total</b></td><td class="num"><b>${money(c.total)}</b></td></tr>
+      <tr><td>Costo por porción</td><td class="num">${money(c.costPortion)}</td></tr>
+    </table></div>
+    <p class="muted">💡 Si hoy cobrás menos de ${money(c.total)}, estás perdiendo plata con esta receta.</p>`;
+}
+
+function renderIngredients(){
+  const el=document.getElementById("ingList");
+  if(!S.ingredients.length){el.innerHTML=`<div class="empty">Sin ingredientes todavía.</div>`;return}
+  el.innerHTML=`<div class="table-scroll"><table><thead><tr><th>Nombre</th><th class="num">Precio</th><th class="num">Paquete</th><th class="num">Costo x unidad</th><th></th></tr></thead><tbody>${
+    S.ingredients.map(i=>`<tr><td>${esc(i.name)}</td><td class="num"><input data-id="${i.id}" data-k="price" type="number" step="any" min="0" value="${i.price}" style="width:100px;text-align:right"></td><td class="num">${i.qty} ${i.unit}</td><td class="num">${S.currency}${unitCost(i).toLocaleString("es-AR",{maximumFractionDigits:2})}/${i.unit}</td><td><button class="btn danger sm" data-del="${i.id}" aria-label="Eliminar">✕</button></td></tr>`).join("")
+  }</tbody></table></div><p class="muted">Cuando suban los precios, actualizá el precio acá y todas tus recetas se recalculan solas.</p>`;
+  el.querySelectorAll("[data-k]").forEach(inp=>inp.onchange=()=>{S.ingredients.find(x=>x.id===inp.dataset.id).price=+inp.value;save();renderIngredients()});
+  el.querySelectorAll("[data-del]").forEach(b=>b.onclick=()=>{if(confirm("¿Eliminar ingrediente?")){S.ingredients=S.ingredients.filter(x=>x.id!==b.dataset.del);save();renderIngredients()}});
+}
+
+function renderSettings(){
+  const map={defRate:"rate",defMargin:"margin",defOverhead:"overhead"};
+  for(const [id,k] of Object.entries(map)){const inp=document.getElementById(id);inp.value=S.defaults[k];inp.oninput=()=>{S.defaults[k]=+inp.value;save()}}
+}
+
+function init(){
+  load();
+  const cur=document.getElementById("currency");cur.value=S.currency;
+  cur.onchange=()=>{S.currency=cur.value;save();show(document.querySelector(".tab[aria-selected=true]").dataset.view)};
+  document.querySelectorAll(".tab").forEach(t=>t.onclick=()=>show(t.dataset.view));
+  document.getElementById("ingForm").onsubmit=e=>{e.preventDefault();const fd=new FormData(e.target);
+    S.ingredients.push({id:uid(),name:fd.get("name").trim(),price:+fd.get("price"),qty:+fd.get("qty"),unit:fd.get("unit")});save();e.target.reset();renderIngredients()};
+  document.getElementById("exportBtn").onclick=()=>{const a=document.createElement("a");a.href=URL.createObjectURL(new Blob([JSON.stringify(S,null,2)],{type:"application/json"}));a.download="costodulce-copia.json";a.click()};
+  document.getElementById("importFile").onchange=e=>{const f=e.target.files[0];if(!f)return;f.text().then(t=>{try{const d=JSON.parse(t);if(!d.recipes||!d.ingredients)throw 0;S=d;save();alert("Copia restaurada ✔");show("recetas")}catch(_){alert("Ese archivo no es una copia válida.")}})};
+  document.getElementById("resetBtn").onclick=()=>{if(confirm("Esto borra todas tus recetas e ingredientes de este dispositivo. ¿Seguro?")){try{localStorage.removeItem(STORE_KEY)}catch(e){}S=null;load();show("recetas")}};
+  show("recetas");
+}
+</script>
+</body>
+</html>

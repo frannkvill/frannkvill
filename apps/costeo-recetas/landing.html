@@ -1,0 +1,109 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>CostoDulce · Dejá de cobrar de menos tus tortas</title>
+<meta name="description" content="Calculá en 2 minutos cuánto te cuesta cada receta y a cuánto venderla. Para pasteleras y pasteleros.">
+<style>
+:root{--bg:#faf7f2;--card:#fff;--ink:#1f1a17;--muted:#6b625b;--line:#e8e1d8;--brand:#7c3aed;--brand-ink:#fff;--accent:#f59e0b}
+@media (prefers-color-scheme: dark){:root{--bg:#141110;--card:#1e1a18;--ink:#f3eee9;--muted:#a59b92;--line:#332c28;--brand:#a78bfa;--brand-ink:#1a1033}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:17px/1.55 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+.wrap{max-width:760px;margin:0 auto;padding:0 16px}
+section{padding:48px 0;border-bottom:1px solid var(--line)}
+h1{font-size:clamp(1.9rem,6vw,2.8rem);line-height:1.1;margin:.3em 0}
+h2{font-size:1.6rem;line-height:1.2;margin:0 0 .6em}
+.pill{display:inline-block;background:var(--card);border:1px solid var(--line);border-radius:999px;padding:4px 12px;font-size:.85rem;color:var(--muted)}
+.lead{font-size:1.15rem;color:var(--muted)}
+.cta{display:block;text-align:center;background:var(--brand);color:var(--brand-ink);text-decoration:none;font-weight:700;padding:16px 20px;border-radius:14px;font-size:1.1rem;margin:20px 0 8px}
+.cta.alt{background:transparent;color:var(--ink);border:2px solid var(--line)}
+.small{font-size:.85rem;color:var(--muted);text-align:center}
+.grid{display:grid;gap:12px;grid-template-columns:repeat(auto-fit,minmax(200px,1fr))}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:18px}
+.card b{display:block;margin-bottom:4px}
+.shot{background:var(--card);border:1px solid var(--line);border-radius:20px;padding:18px;margin-top:24px;box-shadow:0 10px 40px rgba(0,0,0,.08)}
+.price-big{font-size:2.6rem;font-weight:800}
+.strike{text-decoration:line-through;color:var(--muted)}
+ul.check{list-style:none;padding:0}ul.check li{padding:6px 0 6px 28px;position:relative}ul.check li:before{content:"✓";position:absolute;left:0;color:var(--brand);font-weight:800}
+details{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px 16px;margin-bottom:8px}
+summary{cursor:pointer;font-weight:600}
+.bar{display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px dashed var(--line)}
+footer{padding:32px 0;color:var(--muted);font-size:.85rem;text-align:center}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<section>
+  <span class="pill">🎂 Para pasteleras y pasteleros</span>
+  <h1>Dejá de cobrar de menos cada torta que hacés.</h1>
+  <p class="lead">CostoDulce calcula en 2 minutos cuánto te cuesta realmente cada receta —ingredientes, gas, luz, packaging y tus horas— y te dice a cuánto venderla para ganar de verdad.</p>
+  <!-- REEMPLAZAR: link de pago (Mercado Pago / Stripe / PayPal / Lemon Squeezy / Hotmart) -->
+  <a class="cta" href="#precio">Quiero saber cuánto cobrar →</a>
+  <p class="small">Funciona en el celular y en la compu · Sin descargar nada · Acceso inmediato por email</p>
+
+  <div class="shot" aria-label="Vista de la app">
+    <b>Torta de dulce de leche · 12 porciones</b>
+    <div class="bar"><span>Ingredientes</span><span>$6.055</span></div>
+    <div class="bar"><span>Gas y luz (10%)</span><span>$606</span></div>
+    <div class="bar"><span>Tu trabajo (2 h)</span><span>$6.000</span></div>
+    <div class="bar"><span>Caja</span><span>$1.500</span></div>
+    <div class="bar"><b>Costo real</b><b>$14.161</b></div>
+    <p style="margin:.8em 0 0">Precio sugerido: <span class="price-big" style="font-size:1.8rem">$19.825</span></p>
+  </div>
+</section>
+
+<section>
+  <h2>¿Te pasa esto?</h2>
+  <div class="grid">
+    <div class="card"><b>😩 Ponés precio "a ojo"</b>Mirás lo que cobra otra y le restás un poco.</div>
+    <div class="card"><b>📈 Subieron los precios</b>Y no sabés si todavía le ganás a tus tortas.</div>
+    <div class="card"><b>⏰ No contás tus horas</b>Trabajás todo el fin de semana y no te queda nada.</div>
+  </div>
+</section>
+
+<section>
+  <h2>Cómo funciona</h2>
+  <div class="grid">
+    <div class="card"><b>1. Cargás tus ingredientes</b>Como los comprás: "manteca, 200 g, $2.800".</div>
+    <div class="card"><b>2. Armás la receta</b>Elegís cuánto usás de cada uno, las porciones y las horas.</div>
+    <div class="card"><b>3. Ves tu precio</b>Costo total, precio por porción y cuánto ganás. Si sube la harina, todo se recalcula solo.</div>
+  </div>
+</section>
+
+<section id="precio">
+  <h2>Todo lo que te llevás</h2>
+  <ul class="check">
+    <li>Acceso de por vida a CostoDulce (celular y computadora)</li>
+    <li>Recetas e ingredientes ilimitados</li>
+    <li>Recalculo automático cuando cambian los precios</li>
+    <li>Copia de seguridad para pasar tus datos a otro dispositivo</li>
+    <li><b>Bono:</b> guía "Cómo subir precios sin perder clientes" (PDF)</li>
+  </ul>
+  <div class="card" style="text-align:center">
+    <div class="strike">USD 39</div>
+    <div class="price-big">USD 19</div>
+    <div class="small">Pago único · sin suscripción</div>
+    <!-- REEMPLAZAR estos dos href por tus links de pago reales -->
+    <a class="cta" href="https://REEMPLAZAR-LINK-MERCADOPAGO">Pagar en pesos (Mercado Pago)</a>
+    <a class="cta alt" href="https://REEMPLAZAR-LINK-STRIPE-O-PAYPAL">Pagar en dólares (tarjeta / PayPal)</a>
+    <p class="small">🔒 Pago seguro. El acceso te llega al instante al email que ingreses.</p>
+  </div>
+  <div class="card" style="margin-top:12px"><b>🛡️ Garantía de 7 días</b>Si no te sirve, te devolvemos el 100%. Escribinos y listo.</div>
+</section>
+
+<section>
+  <h2>Preguntas frecuentes</h2>
+  <details><summary>¿Tengo que descargar algo?</summary><p>No. Es una web: la abrís desde el link del email y, si querés, la agregás a la pantalla de inicio del celular.</p></details>
+  <details><summary>¿Sirve para otros productos además de tortas?</summary><p>Sí: budines, alfajores, cookies, viandas, cualquier cosa que tenga receta.</p></details>
+  <details><summary>¿Dónde se guardan mis recetas?</summary><p>En tu propio dispositivo. Nadie más las ve. Podés descargar una copia cuando quieras.</p></details>
+  <details><summary>¿Es pago mensual?</summary><p>No, pagás una sola vez.</p></details>
+</section>
+
+<footer>
+  © CostoDulce · <a href="mailto:REEMPLAZAR@tuemail.com" style="color:inherit">Contacto</a> · Términos y licencia de uso personal
+</footer>
+</div>
+</body>
+</html>
