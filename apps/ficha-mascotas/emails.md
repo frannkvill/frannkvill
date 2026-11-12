@@ -1,4 +1,4 @@
-# Emails automáticos · MiPeludo
+# Emails automáticos · MisPeludos
 
 Configúralos en MailerLite / Brevo / el email automático de tu plataforma de cobro.
 Reemplaza `{{nombre}}`, `{{link_app}}` y `{{codigo}}`.
@@ -6,7 +6,7 @@ Reemplaza `{{nombre}}`, `{{link_app}}` y `{{codigo}}`.
 ---
 
 ## 1) Entrega (inmediato tras el pago)
-**Asunto:** Tu acceso a MiPeludo 🐾
+**Asunto:** Tu acceso a MisPeludos 🐾
 
 Hola {{nombre}}:
 
@@ -36,7 +36,7 @@ Listo: la próxima vez que el veterinario pregunte, lo tienes todo a mano.
 ---
 
 ## 3) Pedido de opinión (día 5)
-**Asunto:** ¿Te sirvió MiPeludo?
+**Asunto:** ¿Te sirvió MisPeludos?
 
 Hola {{nombre}}: ¿pudiste armar la ficha de tu mascota?
 Responde con una línea contándome cómo te fue. Me ayuda muchísimo (y si me dejas usarlo como testimonio, te regalo la próxima herramienta).

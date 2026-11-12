@@ -28,7 +28,7 @@ Criterio: público concreto + dolor que cuesta plata/tiempo + resultado visible 
 **Estrategia de portafolio:** elige 2–3 ideas para el **mismo público** (ej. 1 + 6 + 7 para
 emprendedoras gastronómicas). Así cada cliente nuevo es comprador potencial de la siguiente.
 
-**Ideas para ampliar el portafolio de mascotas** (mismo público que MiPeludo): gastos de la mascota
+**Ideas para ampliar el portafolio de mascotas** (mismo público que MisPeludos): gastos de la mascota
 (cuánto gasto al mes en mi perro), bitácora de paseos y adiestramiento, ficha para dejar al
 cuidador o al hotel canino, registro de camadas para criadores, control de pacientes para
 paseadores y peluquerías caninas.

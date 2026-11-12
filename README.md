@@ -17,12 +17,12 @@ El cliente no compra "una app", compra la solución a algo que le molesta todos 
 | App | Carpeta | Público | Precio sugerido | Código demo |
 |---|---|---|---|---|
 | **CostoDulce** · costeo de recetas + valor de tu hora | `apps/costeo-recetas/` | Pasteleras y pasteleros | $14.990 CLP | `DULCE2026` |
-| **MiPeludo** · ficha de salud de mascotas | `apps/ficha-mascotas/` | Dueños de perros y gatos | $9.990 CLP | `PELUDO2026` |
+| **MisPeludos** · ficha de salud de mascotas | `apps/ficha-mascotas/` | Dueños de perros y gatos | $9.990 CLP | `PELUDO2026` |
 
 Cada carpeta trae `index.html` (la app), `landing.html` (página de venta) y `emails.md`
 (los 4 emails automáticos).
 
-**MiPeludo** incluye: varias mascotas, vacunas y antiparasitarios con próxima fecha y avisos,
+**MisPeludos** incluye: varias mascotas, vacunas y antiparasitarios con próxima fecha y avisos,
 visitas al veterinario y a otros profesionales (fisiatra, especialistas, etólogo…) con
 recetas y exámenes adjuntos (foto o PDF), diagnósticos y enfermedades crónicas, remedios con
 horarios, alimentación, peso con gráfico, recordatorios al calendario del teléfono (.ics) y
@@ -87,11 +87,11 @@ Verifica comisiones y condiciones vigentes de cada plataforma antes de elegir.
 
 - **Datos en el dispositivo:** no hay servidor, así que los datos del cliente viven en su
   navegador. Por eso ambas apps tienen copia de seguridad; recuérdaselo en los emails.
-- **Recordatorios:** una web sin servidor no puede enviar notificaciones confiables. MiPeludo
+- **Recordatorios:** una web sin servidor no puede enviar notificaciones confiables. MisPeludos
   lo resuelve agregando los eventos al calendario del teléfono.
 - **Código de acceso:** se valida en el navegador; frena a la mayoría, no a alguien técnico.
   Para productos de este precio alcanza.
-- **Salud animal:** MiPeludo ordena información; no da consejos veterinarios.
+- **Salud animal:** MisPeludos ordena información; no da consejos veterinarios.
 
 ## Legal / impuestos (Chile)
 
