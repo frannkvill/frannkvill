@@ -15,9 +15,10 @@ body{margin:0;background:var(--bg);color:var(--ink);font:17px/1.55 Nunito,system
 h1,h2,.cta,.pill,summary,.price-big{font-family:"Baloo 2",Nunito,system-ui,sans-serif}
 .photo{display:block;width:100%;aspect-ratio:4/3;object-fit:cover;object-position:50% 20%;border-radius:24px;border:4px solid var(--card);box-shadow:0 6px 0 var(--line);margin:18px 0}
 .brandrow{display:flex;align-items:center;gap:12px;margin-bottom:6px}.brandrow b{font-family:"Baloo 2",Nunito,sans-serif;font-size:1.5rem}
-.sticky{position:fixed;left:0;right:0;bottom:0;padding:10px 16px calc(10px + env(safe-area-inset-bottom));background:var(--card);border-top:2px solid var(--line);z-index:5}
-.sticky .cta{margin:0 auto;max-width:728px;padding:10px 16px;font-size:1.1rem}
-footer{padding-bottom:96px!important}
+.sticky{position:fixed;left:16px;bottom:calc(64px + env(safe-area-inset-bottom));z-index:5;transition:transform .25s,opacity .25s}
+.sticky.hide{transform:translateY(20px);opacity:0;pointer-events:none}
+.sticky .cta{margin:0;padding:10px 22px;font-size:1.05rem;display:inline-block;box-shadow:0 4px 0 var(--brand-dark),0 10px 24px rgba(0,0,0,.25)}
+footer{padding-bottom:130px!important}
 .hero-img{display:block;width:64px;height:64px;border-radius:50%;background:#fdf2e6;border:3px solid var(--card);box-shadow:0 3px 0 var(--line);object-fit:cover}
 .wrap{max-width:760px;margin:0 auto;padding:0 16px}
 section{padding:44px 0;border-bottom:2px dashed var(--line)}
@@ -121,5 +122,11 @@ footer{padding:32px 0;color:var(--muted);font-size:.85rem;text-align:center}
 <footer>© CostoDulce · <a href="mailto:REEMPLAZAR@tuemail.com" style="color:inherit">Contacto</a> · Términos y licencia de uso personal</footer>
 </div>
 <div class="sticky"><a class="cta" href="#precio">Quiero CostoDulce →</a></div>
+<script>
+// El botón flotante acompaña al bajar; se oculta mientras se ve el botón principal o la sección del precio
+(function(){var b=document.querySelector('.sticky'),t=[document.querySelector('section .cta'),document.getElementById('precio')],v=[false,false];
+if(!b||!t[0]||!t[1]||!('IntersectionObserver' in window))return;b.classList.add('hide');
+t.forEach(function(el,i){new IntersectionObserver(function(e){v[i]=e[0].isIntersecting;b.classList.toggle('hide',v[0]||v[1])},{threshold:.1}).observe(el)})})();
+</script>
 </body>
 </html>
