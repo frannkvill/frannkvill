@@ -185,9 +185,10 @@ async function viewFile(f){
 
 /* ============ DATOS ============ */
 let S, view="resumen";
-const newPet=d=>({id:uid(),name:"",species:"Perro",breed:"",birth:"",sex:"",chip:"",allergies:"",vet:"",vetPhone:"",owner:"",ownerPhone:"",careNotes:"",photo:"",vaccines:[],visits:[],conditions:[],meds:[],grooming:[],weights:[],feeding:{food:"",amount:"",times:"",notes:""},...d});
+const newPet=d=>({id:uid(),name:"",species:"Perro",breed:"",birth:"",sex:"",chip:"",allergies:"",vet:"",vetPhone:"",owner:"",ownerPhone:"",careNotes:"",photo:"",vaccines:[],visits:[],conditions:[],surgeries:[],sterilized:"",sterilizedDate:"",meds:[],grooming:[],weights:[],feeding:{food:"",amount:"",times:"",notes:""},...d});
 function seed(){
   return{current:null,pets:[newPet({name:"Luna (ejemplo)",species:"Perro",breed:"Mestiza",birth:addDays(-1200),sex:"Hembra",chip:"985 112 004 567 890",allergies:"Alergia al pollo",vet:"Clínica Veterinaria Los Aromos",vetPhone:"+56 9 1234 5678",owner:"Camila Soto",ownerPhone:"+56 9 8765 4321",careNotes:"Es cariñosa pero tímida con perros grandes. Le asustan los ruidos fuertes. Pasea 2 veces al día con arnés. No subir escaleras ni saltar (cadera).",
+    sterilized:"Sí",sterilizedDate:addDays(-900),surgeries:[{id:uid(),name:"Limpieza dental con extracción de una pieza",date:addDays(-250),clinic:"Clínica Los Aromos",notes:"Con anestesia general. Recuperación sin problemas.",files:[]}],
     conditions:[{id:uid(),name:"Dermatitis alérgica alimentaria",since:addDays(-40),status:"En tratamiento",pro:"Dra. Rojas · Clínica Los Aromos",notes:"Alimento hipoalergénico de por vida. Evitar pollo y premios comerciales."},{id:uid(),name:"Displasia de cadera leve",since:addDays(-400),status:"Controlada",pro:"Felipe Muñoz · Fisiatra",notes:"Fisioterapia cada 15 días. Mantener peso bajo 13 kg. Evitar saltos."}],
     vaccines:[{id:uid(),kind:"Vacuna",name:"Óctuple",date:addDays(-350),next:addDays(15),notes:""},{id:uid(),kind:"Vacuna",name:"Antirrábica",date:addDays(-200),next:addDays(165),notes:""},{id:uid(),kind:"Antiparasitario interno",name:"Pastilla antiparasitaria",date:addDays(-95),next:addDays(-5),notes:""}],
     visits:[{id:uid(),date:addDays(-12),pro:"Fisiatra / kinesiólogo",clinic:"Felipe Muñoz · RehabCan",reason:"Sesión de fisioterapia de cadera",diagnosis:"Buena evolución, mejor rango de movimiento",notes:"Ejercicios en casa 10 min al día. Próxima sesión en 15 días.",cost:"22000",files:[]},{id:uid(),date:addDays(-40),pro:"Veterinario",clinic:"Clínica Los Aromos · Dra. Rojas",reason:"Picazón y enrojecimiento en la piel",diagnosis:"Dermatitis alérgica por alimento",notes:"Cambiar a alimento hipoalergénico. Control en 2 meses.",cost:"28000",files:[]}],
@@ -259,6 +260,11 @@ const TYPES={
     {k:"since",label:"Diagnosticada el",type:"date"},
     {k:"pro",label:"Profesional que la trata",full:1,ph:"Dra. Rojas · Clínica Los Aromos"},
     {k:"notes",label:"Cuidados e indicaciones",type:"textarea",ph:"Qué hacer, qué evitar, señales de alerta…"}]},
+  surgeries:{title:"🏥 Antecedentes quirúrgicos",one:"cirugía",sort:"date",files:1,fields:[
+    {k:"name",label:"Cirugía o procedimiento",req:1,full:1,ph:"Extracción dental, cirugía de rodilla, extirpación de un bulto…"},
+    {k:"date",label:"Fecha (aprox.)",type:"date"},
+    {k:"clinic",label:"Clínica / cirujano"},
+    {k:"notes",label:"Motivo, resultado y cuidados",type:"textarea",ph:"Por qué se operó, cómo salió, cuidados posteriores…"}]},
   meds:{title:"💊 Remedios y recetas",one:"remedio",sort:"start",files:1,fields:[
     {k:"name",label:"Remedio",req:1,ph:"Antibiótico, gotas para oídos…"},
     {k:"dose",label:"Dosis",ph:"1/2 comprimido, 3 gotas…"},
@@ -298,7 +304,7 @@ function editRec(key,rec){
 function editPet(p){
   openForm({title:p?"Editar mascota":"Nueva mascota",fields:PET_FIELDS,rec:p,
     onSave:d=>{if(p)Object.assign(p,d);else{const n=newPet(d);S.pets.push(n);S.current=n.id;view="resumen"}save();render()},
-    onDelete:async()=>{for(const k of["visits","meds"])for(const r of p[k])for(const f of r.files||[])idb.del(f.id);
+    onDelete:async()=>{for(const k of["visits","meds","surgeries"])for(const r of p[k])for(const f of r.files||[])idb.del(f.id);
       S.pets=S.pets.filter(x=>x!==p);S.current=S.pets[0]?S.pets[0].id:null;save();render()}});
 }
 
@@ -318,6 +324,7 @@ const TABS=[["resumen","🏠 Resumen"],["vaccines","💉 Vacunas"],["visits","�
 function nextBadge(d){const n=daysTo(d);return n<0?`<span class="badge bad">Atrasada ${-n} día${n===-1?"":"s"}</span>`:n<=30?`<span class="badge warn">${n===0?"Hoy":"En "+n+" día"+(n===1?"":"s")}</span>`:`<span class="badge">${fmt(d)}</span>`}
 // una dosis "pendiente" deja de mostrarse cuando ya hay un registro posterior con el mismo nombre
 function pending(p){return p.vaccines.filter(v=>v.next&&!p.vaccines.some(o=>o!==v&&o.name.trim().toLowerCase()===v.name.trim().toLowerCase()&&o.date>v.date)).sort((a,b)=>a.next.localeCompare(b.next))}
+const sterText=p=>p.sterilized==="Sí"?"Esterilizado/a"+(p.sterilizedDate?" el "+fmt(p.sterilizedDate):""):p.sterilized==="No"?"No esterilizado/a":"";
 const activeConds=p=>p.conditions.filter(c=>c.status!=="Resuelta");
 const condBadge=c=>`<span class="badge ${c.status==="En tratamiento"?"warn":c.status==="Controlada"?"ok":""}">${esc(c.status||"")}</span>`;
 const lastWeight=p=>[...p.weights].sort((a,b)=>b.date.localeCompare(a.date))[0];
@@ -336,7 +343,7 @@ function render(){
   if(!p){M.innerHTML=`<div class="card empty"><div style="font-size:3rem">🐶🐱</div>Aún no tienes mascotas registradas.<br><br><button class="btn" id="first">Agregar mi primera mascota</button></div>`;$("first").onclick=()=>editPet(null);return}
   ({resumen:vResumen,comida:vComida}[view]||vList)(p,M);
   M.querySelectorAll("[data-file]").forEach(el=>el.onclick=e=>{e.stopPropagation();
-    const f=[...p.visits,...p.meds].flatMap(r=>r.files||[]).find(f=>f.id===el.dataset.file);if(f)viewFile(f)});
+    const f=[...p.visits,...p.meds,...p.surgeries].flatMap(r=>r.files||[]).find(f=>f.id===el.dataset.file);if(f)viewFile(f)});
 }
 
 function vResumen(p,M){
@@ -347,7 +354,7 @@ function vResumen(p,M){
       ${p.photo?`<img class="avatar" src="${p.photo}" alt="">`:`<div class="avatar">${EMOJI[p.species]||"🐾"}</div>`}
       <div><h2 style="margin:0;font-size:1.25rem">${esc(p.name)}</h2>
         <div class="muted">${[p.species,p.breed,p.sex,age(p.birth)].filter(Boolean).map(esc).join(" · ")}</div>
-        ${p.chip?`<div class="muted">Microchip: ${esc(p.chip)}</div>`:""}${w?`<div class="muted">Último peso: ${esc(w.kg)} kg (${fmt(w.date)})</div>`:""}</div>
+        ${p.chip?`<div class="muted">Microchip: ${esc(p.chip)}</div>`:""}${sterText(p)?`<div class="muted">${sterText(p)}</div>`:""}${w?`<div class="muted">Último peso: ${esc(w.kg)} kg (${fmt(w.date)})</div>`:""}</div>
     </div>
     ${p.allergies?`<div class="alert">⚠️ ${esc(p.allergies)}</div>`:""}
     ${p.vet||p.vetPhone?`<p style="margin:10px 0 0">🩺 ${esc(p.vet)} ${p.vetPhone?`· <a href="tel:${esc(p.vetPhone.replace(/\s/g,""))}" style="color:var(--brand)">${esc(p.vetPhone)}</a>`:""}</p>`:""}
@@ -382,7 +389,16 @@ function vList(p,M){
   M.innerHTML=(key==="weights"?`<div class="card"><h2>📈 Evolución del peso</h2>${chart(p)}</div>`:"")+
     `<div class="card"><div class="head"><h2>${T.title}</h2><button class="btn sm" id="add">+ Agregar</button></div>
     ${list.length?list.map(r=>`<div class="item" data-rec="${r.id}">${line(r)}</div>`).join(""):`<div class="empty"><div style="font-size:2.2rem">🐾</div>Todavía no hay registros.</div>`}</div>`+
-    ((key==="visits"||key==="grooming")&&list.some(r=>r.cost)?`<p class="muted" style="text-align:center">Gasto total en ${key==="visits"?"atenciones":"peluquería"}: <b>$${list.reduce((s,r)=>s+(+r.cost||0),0).toLocaleString("es-CL")}</b></p>`:"");
+    ((key==="visits"||key==="grooming")&&list.some(r=>r.cost)?`<p class="muted" style="text-align:center">Gasto total en ${key==="visits"?"atenciones":"peluquería"}: <b>$${list.reduce((s,r)=>s+(+r.cost||0),0).toLocaleString("es-CL")}</b></p>`:"")+
+    (key==="conditions"?`<div class="card"><div class="head"><h2>🏥 Antecedentes quirúrgicos</h2><button class="btn sm" id="addSurg">+ Agregar</button></div>
+      <div class="item" id="ster"><div class="top"><div><b>Esterilización</b><div class="muted">${sterText(p)||"Sin información. Toca aquí para indicarlo."}</div></div><span class="badge ${p.sterilized==="Sí"?"ok":""}">${p.sterilized==="Sí"?"Sí":p.sterilized==="No"?"No":"—"}</span></div></div>
+      ${[...p.surgeries].sort((a,b)=>(b.date||"").localeCompare(a.date||"")).map(r=>`<div class="item" data-surg="${r.id}"><div class="top"><div><b>${esc(r.name)}</b><div class="muted">${[fmt(r.date),r.clinic].filter(Boolean).map(esc).join(" · ")}</div>${r.notes?`<div class="muted">${esc(r.notes)}</div>`:""}</div></div>${filesHTML(r)}</div>`).join("")}
+      ${p.surgeries.length?"":`<p class="muted" style="margin:10px 0 0">Sin otras cirugías registradas.</p>`}</div>`:"");
+  if(key==="conditions"){
+    $("addSurg").onclick=()=>editRec("surgeries",null);
+    $("ster").onclick=()=>openForm({title:"Esterilización",rec:p,fields:[{k:"sterilized",label:"¿Está esterilizado/a?",type:"select",opts:["Sin información","Sí","No"]},{k:"sterilizedDate",label:"Fecha (si la sabes)",type:"date"}],onSave:d=>{Object.assign(p,d);save();render()}});
+    M.querySelectorAll("[data-surg]").forEach(el=>el.onclick=()=>editRec("surgeries",p.surgeries.find(r=>r.id===el.dataset.surg)));
+  }
   $("add").onclick=()=>editRec(key,null);
   M.querySelectorAll("[data-rec]").forEach(el=>el.onclick=()=>editRec(key,p[key].find(r=>r.id===el.dataset.rec)));
   M.querySelectorAll("[data-ics]").forEach(b=>b.onclick=e=>{e.stopPropagation();const r=p[key].find(x=>x.id===b.dataset.ics);
@@ -429,7 +445,7 @@ function printReport(p,mode){
   const by=(a,k)=>[...a].sort((x,y)=>(y[k]||"").localeCompare(x[k]||""));
   const w=lastWeight(p),f=p.feeding,times=parseTimes(f.times),care=mode==="cuidador";
   const head=`<div class="phead">${p.photo?`<img src="${p.photo}" alt="">`:""}<div><h1>${care?"Ficha de cuidados":"Ficha clínica"} · ${esc(p.name)}</h1>
-    <p>${[p.species,p.breed,p.sex,age(p.birth)&&("Edad: "+age(p.birth)),p.birth&&("Nac.: "+fmt(p.birth)),w&&("Peso: "+w.kg+" kg"),p.chip&&("Microchip: "+p.chip)].filter(Boolean).map(esc).join(" · ")}</p></div></div>
+    <p>${[p.species,p.breed,p.sex,age(p.birth)&&("Edad: "+age(p.birth)),p.birth&&("Nac.: "+fmt(p.birth)),w&&("Peso: "+w.kg+" kg"),p.chip&&("Microchip: "+p.chip),sterText(p)].filter(Boolean).map(esc).join(" · ")}</p></div></div>
     <table><tr><th>Tutor/a</th><td>${esc([p.owner,p.ownerPhone].filter(Boolean).join(" · ")||"—")}</td></tr><tr><th>Veterinario de cabecera</th><td>${esc([p.vet,p.vetPhone].filter(Boolean).join(" · ")||"—")}</td></tr></table>
     ${p.allergies?`<p class="palert"><b>⚠ Alergias / condiciones importantes:</b> ${esc(p.allergies)}</p>`:""}`;
   const conds=care?activeConds(p):by(p.conditions,"since");
@@ -440,6 +456,7 @@ function printReport(p,mode){
   if(care){
     const latest=vacs.filter((v,i)=>vacs.findIndex(o=>o.name.trim().toLowerCase()===v.name.trim().toLowerCase())===i);
     body=`<h2>Enfermedades y diagnósticos</h2>${condsT}
+      ${p.surgeries.length?`<h2>Cirugías anteriores</h2>${tbl(["Fecha","Cirugía o procedimiento","Notas"],by(p.surgeries,"date").map(x=>[fmt(x.date),x.name,x.notes]))}`:""}
       <h2>Medicamentos que toma actualmente</h2>${tbl(["Remedio","Dosis","Frecuencia","Horarios","Hasta","Notas"],activeMeds(p).map(m=>[m.name,m.dose,m.freq,parseTimes(m.times).join(" · "),fmt(m.end)||"Indefinido",m.notes]))}
       <h2>Alimentación</h2>${feed}
       <h2>Carácter y cuidados</h2><p>${esc(p.careNotes||"—")}</p>
@@ -447,6 +464,7 @@ function printReport(p,mode){
       <h2>En caso de emergencia</h2><p>1) Llamar a ${esc(p.owner||"la tutora o tutor")} ${esc(p.ownerPhone)} · 2) Veterinario: ${esc([p.vet,p.vetPhone].filter(Boolean).join(" · ")||"—")}</p>`;
   }else{
     body=`<h2>Diagnósticos y enfermedades crónicas</h2>${condsT}
+      <h2>Antecedentes quirúrgicos</h2>${tbl(["Fecha","Cirugía o procedimiento","Clínica","Notas"],[...(p.sterilized==="Sí"?[[fmt(p.sterilizedDate),"Esterilización","",""]]:[]),...by(p.surgeries,"date").map(x=>[fmt(x.date),x.name,x.clinic,x.notes])])}
       <h2>Remedios</h2>${tbl(["Remedio","Dosis","Frecuencia","Desde","Hasta","Notas"],by(p.meds,"start").map(m=>[m.name,m.dose,m.freq,fmt(m.start),fmt(m.end),m.notes]))}
       <h2>Visitas y atenciones</h2>${tbl(["Fecha","Profesional","Motivo","Diagnóstico","Indicaciones","Adjuntos"],by(p.visits,"date").map(v=>[fmt(v.date),[v.pro,v.clinic].filter(Boolean).join(" · "),v.reason,v.diagnosis,v.notes,(v.files||[]).length||""]))}
       <h2>Vacunas y antiparasitarios</h2>${tbl(["Fecha","Tipo","Nombre","Próxima dosis","Notas"],vacs.map(v=>[fmt(v.date),v.kind,v.name,fmt(v.next),v.notes]))}
@@ -480,7 +498,7 @@ function openSettings(){
   F.onsubmit=e=>e.preventDefault();D.oncancel=null;
   $("sclose").onclick=()=>D.close();
   $("exp").onclick=async()=>{$("bmsg").textContent="Preparando copia…";const files={};
-    for(const p of S.pets)for(const k of["visits","meds"])for(const r of p[k])for(const f of r.files||[]){const b=await idb.get(f.id);if(b)files[f.id]=await toDataURL(b)}
+    for(const p of S.pets)for(const k of["visits","meds","surgeries"])for(const r of p[k])for(const f of r.files||[]){const b=await idb.get(f.id);if(b)files[f.id]=await toDataURL(b)}
     download(JSON.stringify({app:"mispeludos",version:1,state:S,files}),"application/json",`mispeludos-copia-${today()}.json`);$("bmsg").textContent="Copia descargada ✔"};
   $("imp").onchange=async e=>{const f=e.target.files[0];if(!f)return;
     try{const d=JSON.parse(await f.text());if(d.app!=="mispeludos"||!d.state||!Array.isArray(d.state.pets))throw 0;
