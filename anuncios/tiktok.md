@@ -71,3 +71,12 @@ Textos alternativos para probar más adelante:
 - **Ventas en Hotmart** de esos mismos días. TikTok no sabe cuántas ventas hubo,
   porque la página aún no tiene instalado su píxel.
 - A los 3 o 4 días, pausa el video con peor resultado y deja el otro.
+
+## Estado en la cuenta de TikTok Ads
+
+- Cuenta publicitaria: Apps1113 (Chile, CLP).
+- Videos ya subidos a la biblioteca de la cuenta: "MisPeludos - ultima vacuna" y
+  "MisPeludos - hotel canino".
+- Pendiente para poder crear los anuncios: vincular una cuenta de TikTok a la cuenta
+  publicitaria (los anuncios en TikTok se publican a nombre de una cuenta de TikTok),
+  agregar medio de pago y definir el presupuesto diario.
