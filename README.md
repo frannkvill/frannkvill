@@ -17,7 +17,7 @@ El cliente no compra "una app", compra la solución a algo que le molesta todos 
 | App | Carpeta | Público | Precio sugerido | Código demo |
 |---|---|---|---|---|
 | **CostoDulce** · costeo de recetas + valor de tu hora | `apps/costeo-recetas/` | Pasteleras y pasteleros | $14.990 CLP | `DULCE2026` |
-| **MisPeludos** · ficha de salud de mascotas | `apps/ficha-mascotas/` | Dueños de perros y gatos | $9.990 CLP | `PELUDO2026` |
+| **MisPeludos** · ficha de salud de mascotas | `apps/ficha-mascotas/` | Dueños de perros y gatos | $19.990 CLP | `PELUDO2026` |
 
 Cada carpeta trae `index.html` (la app), `landing.html` (página de venta) y `emails.md`
 (los 4 emails automáticos).
