@@ -4,7 +4,7 @@ Material disponible por producto:
 
 - **3 imágenes con la app** (`01`–`03`): capturas reales de la app, 1080×1350.
 - **3 imágenes con foto** (`04`–`06`): fotos publicitarias generadas con IA + titular, 1080×1350.
-- **1 video vertical** de ~21 s en `videos/` (1080×1920, sin audio): gancho con foto, la app
+- **Videos verticales** de 21 a 24 s en `videos/` (dos versiones para MisPeludos) (1080×1920, sin audio): gancho con foto, la app
   funcionando y cierre con la marca. Sirve para TikTok, Reels e historias. Agrégale música
   desde la propia plataforma al subirlo.
 
