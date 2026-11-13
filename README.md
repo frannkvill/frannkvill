@@ -98,3 +98,20 @@ Verifica comisiones y condiciones vigentes de cada plataforma antes de elegir.
 Para probar no necesitas empresa. Si vendes de forma constante, corresponde iniciar
 actividades en el SII y emitir boleta; consúltalo con un contador. En la landing, deja un
 email de contacto y una política de reembolso clara.
+
+## Prueba gratis
+
+Las dos apps permiten entrar sin comprar:
+
+- **Prueba pública de 3 días:** botón "Pruébala gratis" en la pantalla de acceso y en la
+  página de venta. Al vencer, la app se bloquea y ofrece comprar; los datos registrados se
+  conservan y reaparecen al ingresar el código de compra.
+- **Código de invitado de 7 días:** se ingresa en el mismo campo que el código de compra.
+  Cuenta una sola vez por dispositivo.
+
+Se configuran al inicio del script de cada `index.html` (`TRIAL_DAYS`, `INVITE_DAYS`,
+`INVITE_HASHES`). Para crear un código de invitado nuevo, calcula su hash igual que el de
+compra y agrégalo a `INVITE_HASHES`. Los códigos reales no se guardan en el repositorio.
+
+El plazo se guarda en el dispositivo de cada persona: quien borre los datos del navegador
+puede volver a empezar la prueba, pero pierde lo que registró.
