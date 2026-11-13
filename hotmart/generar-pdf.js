@@ -1,17 +1,21 @@
 // Genera los PDF de acceso que se suben a Hotmart como contenido del producto.
-// Uso: node hotmart/generar-pdf.js   (edita DATOS antes si cambian la dirección, el código o el email)
+// Uso: node hotmart/generar-pdf.js
+// La dirección, el código y el email se leen de hotmart/datos.json, que NO se sube al repositorio
+// (copia hotmart/datos.ejemplo.json y complétalo). Los PDF generados tampoco se suben.
 const {chromium}=require('playwright');const fs=require('fs');const path=require('path');
 const R=path.join(__dirname,'..');
 const DATOS={
-  costodulce:{nombre:'CostoDulce',url:'https://costodulce.netlify.app/app/',codigo:'DULCE2026',email:'ESCRIBE-TU-EMAIL-DE-SOPORTE',
+  costodulce:{nombre:'CostoDulce',
     color:'#c2255c',suave:'#ffe3ea',img:'diseno/costodulce-ilustracion.png',frase:'Ya puedes calcular el costo real de tus recetas y a cuánto venderlas.',
     pasos:['Ve a <b>Mi hora y ajustes</b> y calcula cuánto vale tu hora de trabajo.','En <b>Ingredientes</b>, ingresa los que más usas con el precio de tu última boleta.','Crea tu receta más vendida y mira el <b>precio sugerido</b>.']},
-  mispeludos:{nombre:'MisPeludos',url:'https://mispeludos.netlify.app/app/',codigo:'PELUDO2026',email:'ESCRIBE-TU-EMAIL-DE-SOPORTE',
+  mispeludos:{nombre:'MisPeludos',
     color:'#d9480f',suave:'#ffe8d9',img:'diseno/mispeludos-ilustracion.png',frase:'Ya puedes ordenar toda la salud de tus mascotas en tu celular.',
     pasos:['Edita a "Luna (ejemplo)" con los datos de tu mascota, o bórrala y crea la tuya.','Ingresa sus últimas <b>vacunas</b> con la próxima fecha.','Adjunta una foto de su última <b>receta o examen</b> en Visitas.']},
 };
+const PRIV=JSON.parse(fs.readFileSync(path.join(__dirname,'datos.json'),'utf8'));
+for(const k of Object.keys(DATOS))Object.assign(DATOS[k],PRIV[k]||{});
 (async()=>{const b=await chromium.launch();const p=await b.newPage();
- for(const [k,d] of Object.entries(DATOS)){
+ for(const [k,d] of Object.entries(DATOS)){ if(!d.url||!d.codigo||!d.email){console.log('Faltan datos de',k,'- se omite');continue}
   const img='data:image/png;base64,'+fs.readFileSync(path.join(R,d.img)).toString('base64');
   await p.setContent(`<html><head><meta charset="utf-8"><link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@700;800&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
   <style>@page{size:A4;margin:0}*{box-sizing:border-box}body{margin:0;font:15px/1.5 Nunito,sans-serif;color:#3b2a20}
