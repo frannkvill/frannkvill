@@ -24,7 +24,7 @@ Cada carpeta trae `index.html` (la app), `landing.html` (página de venta) y `em
 
 **MisPeludos** incluye: varias mascotas, vacunas y antiparasitarios con próxima fecha y avisos,
 visitas al veterinario y a otros profesionales (fisiatra, especialistas, etólogo…) con
-recetas y exámenes adjuntos (foto o PDF), diagnósticos y enfermedades crónicas, remedios con
+recetas y exámenes adjuntos (foto o PDF), diagnósticos y enfermedades crónicas, visitas a la peluquería, remedios con
 horarios, alimentación, peso con gráfico, recordatorios al calendario del teléfono (.ics) y
 copia de seguridad con documentos incluidos. Genera dos fichas para compartir: **ficha
 clínica** para el veterinario y **ficha de cuidados** para hotel canino o cuidador (PDF o

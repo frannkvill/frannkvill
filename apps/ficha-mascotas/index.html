@@ -185,13 +185,14 @@ async function viewFile(f){
 
 /* ============ DATOS ============ */
 let S, view="resumen";
-const newPet=d=>({id:uid(),name:"",species:"Perro",breed:"",birth:"",sex:"",chip:"",allergies:"",vet:"",vetPhone:"",owner:"",ownerPhone:"",careNotes:"",photo:"",vaccines:[],visits:[],conditions:[],meds:[],weights:[],feeding:{food:"",amount:"",times:"",notes:""},...d});
+const newPet=d=>({id:uid(),name:"",species:"Perro",breed:"",birth:"",sex:"",chip:"",allergies:"",vet:"",vetPhone:"",owner:"",ownerPhone:"",careNotes:"",photo:"",vaccines:[],visits:[],conditions:[],meds:[],grooming:[],weights:[],feeding:{food:"",amount:"",times:"",notes:""},...d});
 function seed(){
   return{current:null,pets:[newPet({name:"Luna (ejemplo)",species:"Perro",breed:"Mestiza",birth:addDays(-1200),sex:"Hembra",chip:"985 112 004 567 890",allergies:"Alergia al pollo",vet:"Clínica Veterinaria Los Aromos",vetPhone:"+56 9 1234 5678",owner:"Camila Soto",ownerPhone:"+56 9 8765 4321",careNotes:"Es cariñosa pero tímida con perros grandes. Le asustan los ruidos fuertes. Pasea 2 veces al día con arnés. No subir escaleras ni saltar (cadera).",
     conditions:[{id:uid(),name:"Dermatitis alérgica alimentaria",since:addDays(-40),status:"En tratamiento",pro:"Dra. Rojas · Clínica Los Aromos",notes:"Alimento hipoalergénico de por vida. Evitar pollo y premios comerciales."},{id:uid(),name:"Displasia de cadera leve",since:addDays(-400),status:"Controlada",pro:"Felipe Muñoz · Fisiatra",notes:"Fisioterapia cada 15 días. Mantener peso bajo 13 kg. Evitar saltos."}],
     vaccines:[{id:uid(),kind:"Vacuna",name:"Óctuple",date:addDays(-350),next:addDays(15),notes:""},{id:uid(),kind:"Vacuna",name:"Antirrábica",date:addDays(-200),next:addDays(165),notes:""},{id:uid(),kind:"Antiparasitario interno",name:"Pastilla antiparasitaria",date:addDays(-95),next:addDays(-5),notes:""}],
     visits:[{id:uid(),date:addDays(-12),pro:"Fisiatra / kinesiólogo",clinic:"Felipe Muñoz · RehabCan",reason:"Sesión de fisioterapia de cadera",diagnosis:"Buena evolución, mejor rango de movimiento",notes:"Ejercicios en casa 10 min al día. Próxima sesión en 15 días.",cost:"22000",files:[]},{id:uid(),date:addDays(-40),pro:"Veterinario",clinic:"Clínica Los Aromos · Dra. Rojas",reason:"Picazón y enrojecimiento en la piel",diagnosis:"Dermatitis alérgica por alimento",notes:"Cambiar a alimento hipoalergénico. Control en 2 meses.",cost:"28000",files:[]}],
     meds:[{id:uid(),name:"Antihistamínico",dose:"1/2 comprimido",freq:"Cada 12 horas",times:"09:00, 21:00",start:addDays(-3),end:addDays(4),notes:"Dar con comida",files:[]}],
+    grooming:[{id:uid(),date:addDays(-35),place:"Peluquería Patitas",service:"Baño y corte",nails:"Sí",cost:"18000",next:addDays(20),notes:"Corte de verano. Se portó muy bien."}],
     weights:[{id:uid(),date:addDays(-300),kg:"11.2"},{id:uid(),date:addDays(-180),kg:"12.1"},{id:uid(),date:addDays(-40),kg:"12.8"}],
     feeding:{food:"Alimento hipoalergénico de salmón",amount:"120 g por porción",times:"08:00, 20:00",notes:"Sin premios con pollo"}})]};
 }
@@ -246,7 +247,7 @@ const TYPES={
     {k:"notes",label:"Notas",type:"textarea",ph:"Marca, lote, clínica…"}]},
   visits:{title:"🩺 Visitas y atenciones",one:"visita",sort:"date",files:1,fields:[
     {k:"date",label:"Fecha",type:"date",req:1,def:()=>today()},
-    {k:"pro",label:"Profesional",type:"select",opts:["Veterinario","Urgencia","Especialista (dermatólogo, cardiólogo…)","Fisiatra / kinesiólogo","Etólogo / adiestrador","Dentista","Nutricionista","Peluquería canina","Otro"]},
+    {k:"pro",label:"Profesional",type:"select",opts:["Veterinario","Urgencia","Especialista (dermatólogo, cardiólogo…)","Fisiatra / kinesiólogo","Etólogo / adiestrador","Dentista","Nutricionista","Otro"]},
     {k:"clinic",label:"Clínica / nombre del profesional",full:1,ph:"Clínica Los Aromos · Dra. Rojas"},
     {k:"reason",label:"Motivo de la consulta",req:1,full:1,ph:"Control anual, vómitos, cojera…"},
     {k:"diagnosis",label:"Diagnóstico",full:1},
@@ -266,6 +267,14 @@ const TYPES={
     {k:"start",label:"Desde",type:"date",req:1,def:()=>today()},
     {k:"end",label:"Hasta",type:"date"},
     {k:"notes",label:"Notas",type:"textarea",ph:"Dar con comida, guardar refrigerado…"}]},
+  grooming:{title:"✂️ Peluquería",one:"visita a la peluquería",sort:"date",fields:[
+    {k:"date",label:"Fecha",type:"date",req:1,def:()=>today()},
+    {k:"place",label:"Peluquería o peluquero/a",ph:"Peluquería Patitas"},
+    {k:"service",label:"Servicio",type:"select",opts:["Baño y corte","Baño","Corte","Deslanado","Otro"]},
+    {k:"nails",label:"¿Le cortaron las uñas?",type:"select",opts:["Sí","No"]},
+    {k:"cost",label:"Costo ($)",type:"number"},
+    {k:"next",label:"Recordarme pedir hora el",type:"date"},
+    {k:"notes",label:"Notas",type:"textarea",ph:"Cómo se portó, tipo de corte, productos que usaron…"}]},
   weights:{title:"⚖️ Registro de peso",one:"peso",sort:"date",fields:[
     {k:"date",label:"Fecha",type:"date",req:1,def:()=>today()},
     {k:"kg",label:"Peso (kg)",type:"number",req:1}]}
@@ -300,18 +309,19 @@ function ics(events,name){
   events.forEach(e=>{const d=e.date.replace(/-/g,"");L.push("BEGIN:VEVENT","UID:"+uid()+uid()+"@mispeludos","DTSTAMP:"+st);
     if(e.time)L.push("DTSTART:"+d+"T"+e.time.replace(":","")+"00","DURATION:PT15M");else L.push("DTSTART;VALUE=DATE:"+d);
     if(e.daily)L.push("RRULE:FREQ=DAILY"+(e.until?";UNTIL="+e.until.replace(/-/g,"")+"T235959":""));
-    L.push("SUMMARY:"+cl(e.title),"BEGIN:VALARM","ACTION:DISPLAY","DESCRIPTION:"+cl(e.title),"TRIGGER:"+(e.time?"PT0M":"-PT15H"),"END:VALARM","END:VEVENT")});
+    L.push("SUMMARY:"+cl(e.title),"BEGIN:VALARM","ACTION:DISPLAY","DESCRIPTION:"+cl(e.title),"TRIGGER:"+(e.trigger||(e.time?"PT0M":"-PT15H")),"END:VALARM","END:VEVENT")});
   L.push("END:VCALENDAR");download(L.join("\r\n"),"text/calendar",name+".ics");
 }
 
 /* ============ VISTAS ============ */
-const TABS=[["resumen","🏠 Resumen"],["vaccines","💉 Vacunas"],["visits","🩺 Visitas"],["conditions","📋 Diagnósticos"],["meds","💊 Remedios"],["comida","🍖 Comida"],["weights","⚖️ Peso"]];
+const TABS=[["resumen","🏠 Resumen"],["vaccines","💉 Vacunas"],["visits","🩺 Visitas"],["conditions","📋 Diagnósticos"],["meds","💊 Remedios"],["comida","🍖 Comida"],["grooming","✂️ Peluquería"],["weights","⚖️ Peso"]];
 function nextBadge(d){const n=daysTo(d);return n<0?`<span class="badge bad">Atrasada ${-n} día${n===-1?"":"s"}</span>`:n<=30?`<span class="badge warn">${n===0?"Hoy":"En "+n+" día"+(n===1?"":"s")}</span>`:`<span class="badge">${fmt(d)}</span>`}
 // una dosis "pendiente" deja de mostrarse cuando ya hay un registro posterior con el mismo nombre
 function pending(p){return p.vaccines.filter(v=>v.next&&!p.vaccines.some(o=>o!==v&&o.name.trim().toLowerCase()===v.name.trim().toLowerCase()&&o.date>v.date)).sort((a,b)=>a.next.localeCompare(b.next))}
 const activeConds=p=>p.conditions.filter(c=>c.status!=="Resuelta");
 const condBadge=c=>`<span class="badge ${c.status==="En tratamiento"?"warn":c.status==="Controlada"?"ok":""}">${esc(c.status||"")}</span>`;
 const lastWeight=p=>[...p.weights].sort((a,b)=>b.date.localeCompare(a.date))[0];
+const nextGroom=p=>{const g=[...p.grooming].sort((a,b)=>b.date.localeCompare(a.date))[0];return g&&g.next?g:null};
 const activeMeds=p=>p.meds.filter(m=>m.start<=today()&&(!m.end||m.end>=today()));
 const filesHTML=r=>(r.files&&r.files.length)?`<div class="files">${r.files.map(f=>`<span class="file" data-file="${f.id}"><span>${f.type==="application/pdf"?"📄":"🖼️"} ${esc(f.name)}</span></span>`).join("")}</div>`:"";
 
@@ -351,6 +361,7 @@ function vResumen(p,M){
   <div class="card"><h2>📅 Próximas vacunas y antiparasitarios</h2>
     ${pend.length?pend.map(v=>`<div class="item" style="cursor:default"><div class="top"><div><b>${esc(v.name)}</b><div class="muted">${esc(v.kind)} · le toca el ${fmt(v.next)}</div></div>${nextBadge(v.next)}</div></div>`).join(""):`<div class="empty">Nada pendiente 🎉</div>`}
   </div>
+  ${nextGroom(p)?`<div class="card"><h2>✂️ Peluquería</h2><div class="item" style="cursor:default"><div class="top"><div><b>Pedir hora de peluquería</b><div class="muted">Última visita: ${fmt(nextGroom(p).date)}</div></div>${nextBadge(nextGroom(p).next).replace("Atrasada","Atrasado")}</div></div></div>`:""}
   <div class="card"><h2>🌞 Hoy</h2>
     ${times.length?`<p style="margin:0 0 6px">🍽️ <b>Comida:</b> ${times.join(" · ")} ${p.feeding.amount?`<span class="muted">(${esc(p.feeding.amount)})</span>`:""}</p>`:`<p class="muted" style="margin:0 0 6px">Sin horarios de comida. Agrégalos en la pestaña Comida.</p>`}
     ${meds.length?meds.map(m=>`<p style="margin:0 0 6px">💊 <b>${esc(m.name)}</b> ${esc(m.dose)} ${m.freq?"· "+esc(m.freq):""} ${m.end?`<span class="muted">(hasta el ${fmt(m.end)})</span>`:""}</p>`).join(""):`<p class="muted" style="margin:0">Sin remedios activos.</p>`}
@@ -364,18 +375,21 @@ function vList(p,M){
     vaccines:r=>`<div class="top"><div><b>${esc(r.name)}</b><div class="muted">${esc(r.kind)} · aplicada el ${fmt(r.date)}</div>${r.notes?`<div class="muted">${esc(r.notes)}</div>`:""}</div>${r.next?`<div style="text-align:right">${pending(p).includes(r)?nextBadge(r.next):`<span class="badge ok">Al día</span>`}<br><button class="btn ghost sm" data-ics="${r.id}" style="margin-top:6px">📅 Recordar</button></div>`:""}</div>`,
     conditions:r=>`<div class="top"><div><b>${esc(r.name)}</b><div class="muted">${[r.since&&("Desde el "+fmt(r.since)),r.pro].filter(Boolean).map(esc).join(" · ")}</div>${r.notes?`<div class="muted">${esc(r.notes)}</div>`:""}</div>${condBadge(r)}</div>`,
     visits:r=>`<div class="top"><div><b>${esc(r.reason)}</b><div class="muted">${[fmt(r.date),r.pro,r.clinic].filter(Boolean).map(esc).join(" · ")}</div></div>${r.cost?`<span class="badge">$${(+r.cost).toLocaleString("es-CL")}</span>`:""}</div>${r.diagnosis?`<div><b>Diagnóstico:</b> ${esc(r.diagnosis)}</div>`:""}${r.notes?`<div class="muted">${esc(r.notes)}</div>`:""}${filesHTML(r)}`,
-    meds:r=>{const act=activeMeds(p).includes(r),t=parseTimes(r.times);return `<div class="top"><div><b>${esc(r.name)}</b> ${esc(r.dose)}<div class="muted">${[r.freq,t.join(" · ")].filter(Boolean).map(esc).join(" · ")}</div><div class="muted">Desde el ${fmt(r.start)}${r.end?" hasta el "+fmt(r.end):""}</div>${r.notes?`<div class="muted">${esc(r.notes)}</div>`:""}</div><div style="text-align:right"><span class="badge ${act?"ok":""}">${act?"Activo":r.start>today()?"Por empezar":"Terminado"}</span>${act&&t.length?`<br><button class="btn ghost sm" data-ics="${r.id}" style="margin-top:6px">📅 Recordar</button>`:""}</div></div>${filesHTML(r)}`},
+    meds:r=>{const act=activeMeds(p).includes(r),t=parseTimes(r.times);return `<div class="top"><div><b>${esc(r.name)}</b> ${esc(r.dose)}<div class="muted">${[r.freq,t.join(" · ")].filter(Boolean).map(esc).join(" · ")}</div><div class="muted">Desde el ${fmt(r.start)}${r.end?" hasta el "+fmt(r.end):""}</div>${r.notes?`<div class="muted">${esc(r.notes)}</div>`:""}</div><div style="text-align:right"><span class="badge ${act?"ok":""}">${act?"Activo":r.start>today()?"Por empezar":"Terminado"}</span></div></div>${filesHTML(r)}${!r.end||r.end>=today()?`<div class="actions" style="margin-top:8px"><button class="btn ghost sm" data-ics="${r.id}">📅 Agregar al calendario</button><span class="muted" style="align-self:center">${t.length?"Aviso diario a las "+t.join(" y "):"Aviso diario. Agrega horarios para avisos a la hora exacta."}</span></div>`:""}`},
+    grooming:r=>`<div class="top"><div><b>${esc(r.service||"Peluquería")}</b><div class="muted">${[fmt(r.date),r.place].filter(Boolean).map(esc).join(" · ")}</div><div class="muted">Corte de uñas: ${esc(r.nails||"No")}</div>${r.notes?`<div class="muted">${esc(r.notes)}</div>`:""}</div><div style="text-align:right">${r.cost?`<span class="badge">$${(+r.cost).toLocaleString("es-CL")}</span>`:""}</div></div>${r.next?`<div class="actions" style="margin-top:8px"><button class="btn ghost sm" data-ics="${r.id}">📅 Agregar al calendario</button><span class="muted" style="align-self:center">Pedir hora el ${fmt(r.next)}</span></div>`:""}`,
     weights:r=>`<div class="top"><b>${esc(r.kg)} kg</b><span class="muted">${fmt(r.date)}</span></div>`
   }[key];
   M.innerHTML=(key==="weights"?`<div class="card"><h2>📈 Evolución del peso</h2>${chart(p)}</div>`:"")+
     `<div class="card"><div class="head"><h2>${T.title}</h2><button class="btn sm" id="add">+ Agregar</button></div>
     ${list.length?list.map(r=>`<div class="item" data-rec="${r.id}">${line(r)}</div>`).join(""):`<div class="empty"><div style="font-size:2.2rem">🐾</div>Todavía no hay registros.</div>`}</div>`+
-    (key==="visits"&&list.some(r=>r.cost)?`<p class="muted" style="text-align:center">Gasto total en atenciones: <b>$${list.reduce((s,r)=>s+(+r.cost||0),0).toLocaleString("es-CL")}</b></p>`:"");
+    ((key==="visits"||key==="grooming")&&list.some(r=>r.cost)?`<p class="muted" style="text-align:center">Gasto total en ${key==="visits"?"atenciones":"peluquería"}: <b>$${list.reduce((s,r)=>s+(+r.cost||0),0).toLocaleString("es-CL")}</b></p>`:"");
   $("add").onclick=()=>editRec(key,null);
   M.querySelectorAll("[data-rec]").forEach(el=>el.onclick=()=>editRec(key,p[key].find(r=>r.id===el.dataset.rec)));
   M.querySelectorAll("[data-ics]").forEach(b=>b.onclick=e=>{e.stopPropagation();const r=p[key].find(x=>x.id===b.dataset.ics);
     if(key==="vaccines")ics([{title:`${p.name}: ${r.name} (${r.kind.toLowerCase()})`,date:r.next>today()?r.next:addDays(1)}],`${p.name}-${r.name}`);
-    else ics(parseTimes(r.times).map(t=>({title:`${p.name}: ${r.name} ${r.dose||""}`.trim(),date:r.start>today()?r.start:today(),time:t,daily:1,until:r.end||addDays(30)})),`${p.name}-${r.name}`)});
+    else if(key==="grooming")ics([{title:`${p.name}: pedir hora de peluquería`,date:r.next>today()?r.next:addDays(1)}],`${p.name}-peluqueria`);
+    else{const t=parseTimes(r.times),base={title:`${p.name}: ${r.name} ${r.dose||""}`.trim(),date:r.start>today()?r.start:today(),daily:1,until:r.end||""};
+      ics(t.length?t.map(x=>({...base,time:x})):[{...base,trigger:"PT9H"}],`${p.name}-${r.name}`)}});
 }
 
 function chart(p){
